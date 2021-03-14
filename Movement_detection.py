@@ -4,33 +4,22 @@ import seaborn as sns
 import numpy as np
 import cv2
 from random import randint
-
+from skimage.measure import compare_ssim
 # ----------------------------------------------------------------------------
 '''FONCTIONS '''
-treshold = 30
-# def diff(now, prev):
-#     next = now.copy()
-#     for y,line in enumerate(now):
-#         for x,cel in enumerate(line):
-#             if distSq(cel,prev[y][x]) < treshold**2:
-#                 next[y][x] = 0
-#             else:
-#                 next[y][x] = 255
-    # return next
 def applyKernel(img):
     kernel = np.array([[-1,-1,-1],[-1,8,-1],[-1,-1,-1]]) #Edge detection
     return cv2.filter2D(img,-1,kernel)
 
-def diff(now,prev):
-    # next = cv2.cvtColor(now, cv2.COLOR_BGR2GRAY)
-    # prev = cv2.cvtColor(prev, cv2.COLOR_BGR2GRAY)
-    next = cv2.compare(now,prev,cv2.CMP_NE,dst=  120)
-    '''IL Y A DES CHOSES A REGLER ICI
-    Le résultat n'est pas encore celui escompté.
-    ça clignote encore trop
-'''
-
-    return next
+def diff(now,prev,threshold = 150):
+    '''
+    Now et Prev sont deux images qui se suivent.
+    Elles doivent être en nuance de gris
+    '''
+    (score,diff) = compare_ssim(now,prev,full=True)
+    next = (diff*255).astype("uint8") #Utile pour le threshold
+    result = cv2.threshold(dif,threshold,255,cv2.THRESH_BINARY_INV)
+    return result[1]
 
 
 def oneColor(img,n):
@@ -68,10 +57,11 @@ while True:
 
     dif = diff(gray,prev_gray)
     #cv2.imshow('frame',applyKernel(frame))
-    result = cv2.threshold(gray,110,255,cv2.THRESH_BINARY)
-    cv2.imshow('window',result[1])
-    cv2.imshow('frame',dif)
+    #result = cv2.threshold(gray,110,255,cv2.THRESH_BINARY)
 
+    #cv2.imshow('window',result[1])
+    cv2.imshow('frame',dif)
+    cv2.imshow('window',good_result[1])
 
 
 
