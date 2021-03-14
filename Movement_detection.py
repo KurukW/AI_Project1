@@ -192,9 +192,9 @@ while True:
     #cv2.imshow('window',result[1])
 
 # Detection de mouvement
-    movement = movement_detect(gray,prev_gray)
-    contour = draw_contours(frame,movement)
-    rect = draw_rect_contours(frame,movement)
+    movement = movement_detect(gray,prev_gray) #Noir et blanc avec mvt
+    contour = draw_contours(frame,movement) # Contour du mvt sur rgb
+    rect = draw_rect_contours(frame,movement) #Carré sur mvt
     #cv2.imshow('frame',movement)
     cv2.imshow('window',contour)
     cv2.imshow('frame',rect)
