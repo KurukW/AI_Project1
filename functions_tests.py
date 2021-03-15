@@ -2,6 +2,14 @@ import cv2
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
+
+'''
+Quelques fonctions de traitement d'images qui n'étaient pas nécessaire
+dans le détecteur de mouvement
+
+'''
+
+
 def apply_kernel(img):
     '''
     Applique un kernel à l'image

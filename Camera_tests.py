@@ -4,6 +4,14 @@ import seaborn as sns
 import cv2
 
 
+'''
+Test de détection de mains.
+Ce n'est pas très efficace
+
+'''
+
+
+
 #face_cascade = cv2.CascadeClassifier('C:\\Users\\william\\Documents\\Scolaire\\M1\\Systèmes_Intelligents\\03_Image and video Processing\\Images and videos\\DATA\\haarcascades\\haarcascade_frontalface_default.xml')
 face_cascade = cv2.CascadeClassifier('DATA\\haarcascade_frontalface_default.xml')
 hand_cascade = cv2.CascadeClassifier('DATA\\hand_a.xml') #Pas très efficace

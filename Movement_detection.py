@@ -96,8 +96,7 @@ if __name__ == "__main__":
 
         # # Our operations on the frame come here
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        #gray = cv2.cvtColor(movement_detect(frame,prev), cv2.COLOR_BGR2GRAY)
-
+        
     # Detection de mouvement
         movement = movement_detect(gray,prev_gray) #Noir et blanc avec mvt
         contour = draw_contours(frame,movement) # Contour du mvt sur rgb
