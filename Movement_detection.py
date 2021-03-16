@@ -58,7 +58,7 @@ def get_contours(movement):
 
 def extract_movement_zones(img,contours):
     '''
-SEMBLABLE A L'OBJET ZONES
+SEMBLABLE A L'OBJET ZONES - CA NE FONCTIONNE PAS
     img = image dans laquelle on va découper des zones en mouvement
     contours= liste des coordonnées des zones en mouvement
     '''
@@ -67,9 +67,6 @@ SEMBLABLE A L'OBJET ZONES
         (x, y, w, h) = cv2.boundingRect(contour)
         new_zone = img[x:x+w, y:y+h]
         zones.append(new_zone)
-        if(w > 1 & h > 1):
-            print("Je vais afficher qqch")
-            cv2.imshow('Movement',new_zone)
     return zones
 
 
@@ -119,8 +116,7 @@ def draw_rect_contours(img,movement,area_size = 700):
     le considère. Il dépend du contexte
     '''
     new_img = img.copy()
-    blurred = hole_filling(movement)
-    contours, _ = cv2.findContours(blurred,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours = get_contours(movement)
 
     #Dessine des rectangles
     n_contours = 0
@@ -166,6 +162,8 @@ if __name__ == "__main__":
     #Je le met une fois dehors pour avoir une première image à copier dans prev
     ret, frame = cap.read()
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+
     while True:
 
         # Capture frame-by-frame
@@ -182,10 +180,8 @@ if __name__ == "__main__":
         cv2.imshow('Contours',contour)
         cv2.imshow('Rectangles',rect)
         #cv2.imshow('Gris',gray)
-
         #zones = extract_movement_zones(frame,get_contours(movement))
-
-
+        #Ne fonctionne pas
 
         # This command let's us quit with the "q" button on a keyboard.
         # Simply pressing X on the window won't work!
