@@ -6,7 +6,7 @@ import cv2
 from random import randint
 from skimage.measure import compare_ssim
 from scipy import signal
-
+import time
 '''
 Amélioration à faire:
 - Ajouter système de blob comme "coding train " pour garder la trace de ce qui bouge
@@ -14,19 +14,87 @@ Amélioration à faire:
 Ou les images en mvt en fonction de l'utilisation que j'en ai, mais je peux
 faire une autre fonction qui va transformer coordonnées en images/
 
+
+
+NOTES:
+Pour l'instant, il y a concurrence entre les objets et les rectangles.
+En effet, j'ai écrit les rectangles avant et maintenant je travaille pour
+transformer tout ça en objet.
+(le but étant de pouvoir transférer les images qui seront stocké dans les objets)
+Tracasss ça va fonctionner
 '''
 # ----------------------------------------------------------------------------
 '''OBJECTS'''
+proximity_thresh = 10
+min_area_thresh = 100
+#Si la distance entre deux zones est inférieures à cette valeur, je les fusionne
+
+
 class Zones:
-    def __init__(self,img, x,y,w,h):
+    def __init__(self, x, y, w, h):
         '''
         (x,y) coordonnées en haut à gauche
         (w,h) taille du rectangle
         '''
-        self.img = img[x:x+w, y:y+h]
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
 
-    def show(self):
-        cv2.imshow('myObject',self.img)
+    def create_my_img(self, img):
+        self.img = img[self.y:self.y+self.h, self.x:self.x+self.w]
+
+    def dist_to_me(self, x, y, w, h):
+        '''
+        Mesure la distance entre notre côtés et le côté de l'autre
+        Je vais calculer la distance entre les centres
+        Ensuite avec la taille de mes zones je peux définir la distance entre les bordures
+        '''
+
+        #Je t'ai fait des grands noms exprès pour que ce soit plus clair
+        me_center_x = self.x + self.w/2.0
+        me_center_y = self.y + self.h/2.0
+        other_center_x = x + w/2.0
+        other_center_y = y + h/2.0
+
+        #Sol 1 en calculant la racine
+        center_dist = sqrt_dist(me_center_x, me_center_y, other_center_x, other_center_y)
+        center_edge_both = np.sqrt((self.w/2.0 + w/2.0)**2 + (self.h/2.0 + h/2.0)**2)
+        edge_dist = center_dist - center_edge_both
+        #Sol 2 sans calculer la racine
+        #Je n'ai aps encore trouvé
+        return edge_dist
+
+
+        #Sol 2 sans calculer la racine
+        #Je n'ai aps encore trouvé
+
+    def is_close_to_me(self, x, y, w, h):
+        '''
+        Compare notre position avec un nouvel objet pour savoir si on doit
+        l'ajouter à cet objet ou pas
+        On va comparer les distances au carré pour ne pas calculer la racine
+        '''
+
+        if self.dist_to_me(x,y,w,h) < proximity_thresh:
+            return True
+        return False
+
+    def add_close(self, x, y, w, h):
+        #Modifications de mes coordonnées
+        self.x = min(x, self.x)
+        self.y = min(y, self.y)
+        maxx = max(self.x + self.w, x + w)
+        maxy = max(self.y + self.h, y + h)
+        self.w = maxx - self.x
+        self.h = maxy - self.y
+        #Je fusionne les deux zones
+
+    def draw_on_image(self,img,color = (0,255,255),thickness = 2):
+        cv2.rectangle(img,(self.x,self.y),(self.x+self.w,self.y+self.h), color = color, thickness = thickness)
+
+    def show(self,title):
+        cv2.imshow(title,self.img)
 
 # ----------------------------------------------------------------------------
 '''FONCTIONS '''
@@ -41,13 +109,49 @@ def movement_detect(now,prev,threshold = 150):
     result = cv2.threshold(next,threshold,255,cv2.THRESH_BINARY_INV)
     return result[1]
 
-def show_zones(zones):
+def sqrt_dist(x1, y1, x2 ,y2):
     '''
-    zones est une liste avec les objets zone
+    Calcule la distance réelle entre deux pixels
+    '''
+    return np.sqrt((x1-x2)**2 + (y1-y2)**2)
 
-    '''
-    if len(zones) >= 0:
-        cv2.imshow('Zones',zones[0].img)
+
+# J'ai commenté ces deux fonctions qui sont écrites trop tôt
+#Je ne dois pas ouvrir plein de fenêtres différntes, je dois trouver
+#un moyen de mettre toutes les images dans une même fenêtre.
+#Afin d'avoir une fenêtre fixe
+
+# def create_zones_img(img,zones):
+#     '''
+#     Créer l'image de chaque zone
+#     '''
+#     if len(zones) == 0:
+#         return
+#     for zone in zones:
+#         zone.create_my_img(img)
+# def show_zones(zones):
+#     '''
+#     Sort une fenêtre par zone
+#     '''
+#     if len(zones) == 0:
+#         return
+#     for e,zone in enumerate(zones):
+#         zone.show(f"Numéro {e}")
+
+#
+# def show_concatene_img_zones(zones):
+# '''
+# Fonction écrites avec les pieds
+# Ne fonctionne pas car je dois concaténer des img qui ont la même taille
+# '''
+#     size = int(np.sqrt(len(zones)))
+#     #int arrondi en dessous donc pas de soucis
+#     output_img = zones[0].img
+#     for i in range(1,len(zones)):
+#         output_img = np.concatenate((output_img, zones[i].img),axis = 1)
+#
+#     return output_img
+
 
 
 
@@ -58,17 +162,26 @@ def get_contours(movement):
 
 def extract_movement_zones(img,contours):
     '''
-SEMBLABLE A L'OBJET ZONES - CA NE FONCTIONNE PAS
+SEMBLABLE A L'OBJET ZONES
     img = image dans laquelle on va découper des zones en mouvement
     contours= liste des coordonnées des zones en mouvement
     '''
     zones = [] #sections d'images en mouvement
     for contour in contours:
         (x, y, w, h) = cv2.boundingRect(contour)
-        new_zone = img[x:x+w, y:y+h]
+        new_zone = img[y:y+h, x:x+w]
         zones.append(new_zone)
+        cv2.imshow('Mouvement',new_zone)
     return zones
 
+def show_movement_zones(img,contours):
+    for contour in contours:
+        (x, y, w, h) = cv2.boundingRect(contour)
+        #print(x,y,w,h)
+        if (w*h) > 1500: #Taille minimale
+            new_zone = img[y:y+h, x:x+w]
+            #x et y sont dans le sens inverse d'ailleurs, ce n'est pas logique
+            cv2.imshow('Mouvement',new_zone)
 
 
 def write_on_image(img,text, color = (255,255,255)):
@@ -93,21 +206,19 @@ def write_on_image(img,text, color = (255,255,255)):
         fontColor,
         lineType)
 
-
-def draw_contours(img,movement):
+def draw_contours(img,contours):
     '''
     Dessine les contours des zones en mouvement
     img est l'image sur laquelle on va dessiner.
     Movement est l'image en noir et blanc qui sert à faire la détection de mvt
     '''
     new_img = img.copy()
-    contours = get_contours(movement)
 
     cv2.drawContours(new_img,contours, -1, (0,255,0), 2)
     write_on_image(new_img,str(len(contours)))
     return new_img
 
-def draw_rect_contours(img,movement,area_size = 700):
+def draw_rect_contours(img,contours,area_size = 700):
     '''
     Dessine des carrés sur les zones en mouvement
     img est l'image sur laquelle on va dessiner.
@@ -116,8 +227,6 @@ def draw_rect_contours(img,movement,area_size = 700):
     le considère. Il dépend du contexte
     '''
     new_img = img.copy()
-    contours = get_contours(movement)
-
     #Dessine des rectangles
     n_contours = 0
     for contour in contours:
@@ -146,6 +255,42 @@ def hole_filling(img,kernel_size = 15, passage = 1):
         #blur = cv2.medianBlur(output,5,0)
         _, output = cv2.threshold(blur, 20, 255, cv2.THRESH_BINARY)
     return output
+
+def generate_zones(contours):
+    zones = []
+    #Analyse et dessins des contours par la méthode objet
+    for contour in contours:
+        if cv2.contourArea(contour) < min_area_thresh: #Dépend du contexte
+            continue #On ne s'intéresse qu'aux grandes régions
+        (x, y, w, h) = cv2.boundingRect(contour)
+        if len(zones) == 0:
+            #Pas d'objets, j'ajoute le premier
+            zones.append(Zones(x,y,w,h))
+
+        #Je compare le nouveau contour aux objets existants
+        shortest_dist = width * height #Je suis certain d'être supérieur au max
+        closest_zone = 0
+        for existing_zone in zones:
+            #Je cherche la zone la plus proche
+            existing_zone_dist = existing_zone.dist_to_me(x, y, w, h)
+            if existing_zone_dist < shortest_dist:
+                shortest_dist = existing_zone_dist
+                closest_zone = existing_zone
+
+        if shortest_dist < proximity_thresh:
+            closest_zone.add_close(x, y, w, h)
+        else:
+        #Je créé une nouvelle zone
+            zones.append(Zones(x,y,w,h))
+    return zones
+
+def draw_all_zones(img,zones):
+    img_by_zones = img.copy()
+    for zone in zones:
+        zone.draw_on_image(img_by_zones)
+    write_on_image(img_by_zones,str(len(zones)))
+    return img_by_zones
+
 ## ----------------------------------------------------------------------------
 ''' MAIN CODE '''
 #On peut inclure le movement detection dans un autre code et avoir
@@ -164,30 +309,41 @@ if __name__ == "__main__":
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
 
-    while True:
 
+    while True:
         # Capture frame-by-frame
         prev_gray = gray #J'enregistre la dernière image
         ret, frame = cap.read()
-
         # # Our operations on the frame come here
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # Detection de mouvement
         movement = movement_detect(gray,prev_gray) #Noir et blanc avec mvt
-        contour = draw_contours(frame,movement) # Contour du mvt sur rgb
-        rect = draw_rect_contours(frame,movement,700) #Carré sur mvt
+        contours = get_contours(movement)
+
+        contour = draw_contours(frame,contours) # Contour du mvt sur rgb
+        rect = draw_rect_contours(frame,contours,700) #Carré sur mvt
         cv2.imshow('Contours',contour)
         cv2.imshow('Rectangles',rect)
-        #cv2.imshow('Gris',gray)
-        #zones = extract_movement_zones(frame,get_contours(movement))
-        #Ne fonctionne pas
+
+        show_movement_zones(frame,contours)
+
+        zones = generate_zones(contours)
+        #Toutes mes zones sont créées, mtn je dois les dessiner sur l'image et l'afficher
+        img_by_zones = draw_all_zones(frame, zones)
+        cv2.imshow('Dessin',img_by_zones)
+        #
+
+        #Pas fonctionnel
+        # create_zones_img(frame,zones)
+        # concatene = show_concatene_img_zones(zones)
+        # cv2.imshow('Le Bordel',concatene)
+
 
         # This command let's us quit with the "q" button on a keyboard.
         # Simply pressing X on the window won't work!
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-
     # When everything done, release the capture and destroy the windows
     cap.release()
     cv2.destroyAllWindows()
