@@ -7,6 +7,7 @@ from random import randint
 from skimage.measure import compare_ssim
 from scipy import signal
 import time
+
 '''
 Amélioration à faire:
 - Ajouter système de blob comme "coding train " pour garder la trace de ce qui bouge
@@ -71,11 +72,11 @@ class Zones:
 
     def is_close_to_me(self, x, y, w, h):
         '''
+        Fonction obselete
         Compare notre position avec un nouvel objet pour savoir si on doit
         l'ajouter à cet objet ou pas
         On va comparer les distances au carré pour ne pas calculer la racine
         '''
-
         if self.dist_to_me(x,y,w,h) < proximity_thresh:
             return True
         return False
@@ -98,16 +99,23 @@ class Zones:
 
 # ----------------------------------------------------------------------------
 '''FONCTIONS '''
-def movement_detect(now,prev,threshold = 150):
+def movement_detect(now,prev,threshold = 150,sol = 1):
     '''
     Now et Prev sont deux images qui se suivent.
-    Elles doivent être en nuance de gris
+    (Elles doivent être en nuance de gris)
+    Je renvoie une image en noir et blanc avec les images
     '''
-    (score,diff) = compare_ssim(now,prev,full=True) #Différence entre les images
-    #diff = cv2.absdiff(now,prev) #Autre méthode
-    next = (diff*255).astype("uint8") #Utile pour le threshold
-    result = cv2.threshold(next,threshold,255,cv2.THRESH_BINARY_INV)
-    return result[1]
+    #Sol 1
+    if sol == 1:
+        (score,diff) = compare_ssim(now,prev,full=True) #Différence entre les images
+        next = (diff*255).astype("uint8") #Utile pour le threshold
+        result = cv2.threshold(next,threshold,255,cv2.THRESH_BINARY_INV)
+        return result[1]
+    #Sol 2
+    diff = cv2.absdiff(now,prev)
+    result = cv2.threshold(diff,threshold,255,cv2.THRESH_BINARY)
+    output = cv2.cvtColor(result[1],cv2.COLOR_BGR2GRAY)
+    return output
 
 def sqrt_dist(x1, y1, x2 ,y2):
     '''
@@ -313,6 +321,7 @@ if __name__ == "__main__":
     while True:
         # Capture frame-by-frame
         prev_gray = gray #J'enregistre la dernière image
+        prev = frame
         ret, frame = cap.read()
         # # Our operations on the frame come here
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -326,7 +335,13 @@ if __name__ == "__main__":
         cv2.imshow('Contours',contour)
         cv2.imshow('Rectangles',rect)
 
-        show_movement_zones(frame,contours)
+    ##Différence entre les deux fonctions d'analyse de Mouvement
+        # movement1 = movement_detect(gray,prev_gray,150,1)
+        # movement2 = movement_detect(frame,prev,20,2)
+        # cv2.imshow('Sol 1', movement1)
+        # cv2.imshow('Sol 2', movement2)
+
+        #show_movement_zones(frame,contours)
 
         zones = generate_zones(contours)
         #Toutes mes zones sont créées, mtn je dois les dessiner sur l'image et l'afficher
