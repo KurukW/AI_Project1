@@ -1,6 +1,9 @@
 from Movement_detection import *
 import cv2
 import numpy as np
+from scipy.spatial import Voronoi, voronoi_plot_2d
+import scipy.spatial
+import matplotlib.pyplot as plt
 
 '''
 
@@ -8,6 +11,8 @@ J'ai juste fait quelques tests, rien de concluant pour l'instant
 
 
 '''
+
+
 
 
 
@@ -26,9 +31,8 @@ def resize(img,ratio = 2,toGray = True):
     width = int(img.shape[1] * ratio)
     height = int(img.shape[0] * ratio)
     img_big = cv2.resize(img,(width,height),cv2.INTER_LINEAR)
-    if toGray:
-        img_big = cv2.cvtColor(img_big, cv2.COLOR_RGB2GRAY)
-    return img_big
+    img_gray = cv2.cvtColor(img_big, cv2.COLOR_RGB2GRAY)
+    return img_big, img_gray
 
 def resize_and_draw_contours(img,ratio = 2):
     '''
@@ -36,10 +40,10 @@ def resize_and_draw_contours(img,ratio = 2):
     les aggrandit et dessine les contours dessus
 
     '''
-    img_big = resize(img,ratio,True)
+    img_big, img_gray = resize(img,ratio,True)
     img_cont = get_contours(img_gray) #cleared function to find output
     img_output = cv2.drawContours(img_big,img_cont,-1,(0,255,0))
-    img_contours = np.zeros((width,height),dtype=np.uint8)
+    img_contours = np.zeros((img_big.shape[1],img_big.shape[0]),dtype=np.uint8)
     cv2.drawContours(img_contours,img_cont,-1,(255,255,255))
     return img_output, img_contours,img_cont
 
@@ -72,7 +76,7 @@ if __name__ == '__main__':
     plant = cv2.imread("images\\plant.jpg")
 
     _,plant = cv2.threshold(plant,150,255,cv2.THRESH_BINARY_INV)
-    plant,_,_ = resize_and_draw_contours(plant,1)
+    plant,plant_contour_only,plant_contours = resize_and_draw_contours(plant,1)
 
     rect_big, rect_cont, rect_contours = resize_and_draw_contours(rect,10)
     circ_big, circ_cont, _ = resize_and_draw_contours(circ,10)
@@ -81,14 +85,52 @@ if __name__ == '__main__':
 
     blur = blur_thresh(plant,1,15,150)
 
+
+
+    #Voronoi est une librairie qui va calculer voronoi pour nous
+    #Je traduis mes points manuellement
+
+    points = [elt[0] for elt in plant_contours[0]]
+    vor = Voronoi(points)
+    fig = voronoi_plot_2d(vor)
+    # plt.show()
+    # print(scipy.spatial.__file__) #Permet de trouver la localisation sur son pc
+
+    #Autre solution: dessin sur un cv2
+    vd = np.zeros(plant.shape)#voronoi diagram
+
+    # cv2.polylines(vd,vor.vertices,True,(0,255,255))
+    vor_points = vor.vertices #Points du futur squelette
+    for i,point in enumerate(vor_points):
+        pt1 = (int(point[0]),int(point[1]))
+        # pt2 = (100,100)
+        # if i == (len(vor_points)-1):
+        #     pt2 = (int(vor_points[0][0]),int(vor_points[0][1]))
+        # else:
+        #     pt2 = (int(vor_points[i+1][0]),int(vor_points[i+1][1]))
+        # cv2.line(vd,pt1,pt2,(255,255,255),2)
+        cv2.circle(vd,pt1,0,(255,255,255),-1)
+    # print(vor.vertices)
+
+
+
+
+
+
+
+
+
+
     while True:
         # if cv2.waitKey(1) & 0xFF == ord('n'):
         #     blur = blur_thresh(blur,1,15,150)
         #
-        # cv2.imshow('shape_rect',plant)
+        cv2.imshow('shape_rect',plant)
+        cv2.imshow('voronoi',vd)
+        cv2.imshow('contours',plant_contour_only)
         # cv2.imshow('blurred',blur)
 
-        #cv2.imshow('cont_rect',rect_cont)
+        # cv2.imshow('cont_rect',rect_cont)
         # cv2.imshow('cont_circ',circ_cont)
         # cv2.imshow('shape_circ',circ_big)
         # cv2.imshow('new',new_cont)
@@ -114,13 +156,17 @@ Explication de chaque ligne que j'ai compris
 
 'Vsites := Subsample(C)'
 Subsample est un échantillonage.
-On réduit le nombre de points mais je ne comprends pas si les points sont
-sur le contour ou si ils sont à l'intérieur. Ou même dans le background
+(au pire on échantillone pas, mais c'est lourd)
+On réduit le nombre de points du contour pour avoir un calcul de voronoi
+plus facile.
+Tous les points du contour qui reste sont des sites de Voronoi
 
 
 'V := VoronoiTesselation(Vsites);'
 V est l'ensemble des polygones de voronoi fabriqué à partir de l'ensemble
 des points Vsites
+
+IL FAUT LIRE B.4 GRAPH MATCHING
 
 'foreach sij in V do'
 sij est l'intersection entre deux et sltm deux polygones de voronoi.
