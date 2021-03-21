@@ -223,7 +223,7 @@ def write_on_image(img,text, color = (255,255,255)):
         fontScale,
         fontColor,
         lineType)
-
+        
 def draw_contours(img,contours):
     '''
     Dessine les contours des zones en mouvement

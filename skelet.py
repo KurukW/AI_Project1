@@ -10,7 +10,12 @@ J'ai juste fait quelques tests, rien de concluant pour l'instant
 '''
 
 
-
+def blur_thresh(img,passe = 1,kernel_size = 3,thresh = 200):
+    blur = img.copy()
+    for i in range(passe):
+        blur = cv2.GaussianBlur(blur,(kernel_size,kernel_size),0)
+        _,blur = cv2.threshold(blur,thresh,255,cv2.THRESH_BINARY)
+    return blur
 
 
 
@@ -56,21 +61,30 @@ def draw_contours_points(contours,shape=(480,480)):
 if __name__ == '__main__':
     rect = cv2.imread("images\\rectangle.jpg")
     circ = cv2.imread("images\\circle.jpg")
+    plant = cv2.imread("images\\plant.jpg")
+
+    _,plant = cv2.threshold(plant,150,255,cv2.THRESH_BINARY_INV)
+    plant,_,_ = resize_and_draw_contours(plant,1)
 
     rect_big, rect_cont, rect_contours = resize_and_draw_contours(rect,10)
     circ_big, circ_cont, _ = resize_and_draw_contours(circ,10)
 
     new_cont,new_shape = draw_contours_points(rect_contours)
 
+    blur = blur_thresh(plant,1,15,150)
 
     while True:
+        if cv2.waitKey(1) & 0xFF == ord('n'):
+            blur = blur_thresh(blur,1,15,150)
 
-        # cv2.imshow('shape_rect',rect_big)
-        cv2.imshow('cont_rect',rect_cont)
+        cv2.imshow('shape_rect',plant)
+        cv2.imshow('blurred',blur)
+
+        #cv2.imshow('cont_rect',rect_cont)
         # cv2.imshow('cont_circ',circ_cont)
         # cv2.imshow('shape_circ',circ_big)
         # cv2.imshow('new',new_cont)
-        cv2.imshow('points',new_shape)
+        # cv2.imshow('points',new_shape)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
