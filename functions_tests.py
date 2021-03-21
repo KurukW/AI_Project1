@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
-
+import os
 
 '''
 Quelques fonctions de traitement d'images qui n'étaient pas nécessaire
@@ -71,13 +71,107 @@ def one_color(img,n):
     return new_img
 
 
-def reduce_pixel(img,stride = 1,kernel_size = 3):
+# def reduce_pixel(img,stride = 1,kernel_size = 3):
+#     '''
+#     Réduit le nombre de pixels d'une image à l'aide d'un kernel
+#     '''
+#     kernel = np.ones((kernel_size,kernel_size),np.uint8)/(kernel_size**2) #Grand flou
+#     output = strided_convolution(img, kernel, stride)
+#     return output
+
+def get_dominant_color(img):
     '''
-    Réduit le nombre de pixels d'une image à l'aide d'un kernel
+    Stolen
+    Fonction permettant de connaitre la couleur dominante d'une image
+
     '''
-    kernel = np.ones((kernel_size,kernel_size),np.uint8)/(kernel_size**2) #Grand flou
-    output = strided_convolution(img, kernel, stride)
-    return output
+    pixels = np.float32(img.reshape(-1, 3))
+
+    n_colors = 5
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 200, .1)
+    flags = cv2.KMEANS_RANDOM_CENTERS
+
+    _, labels, palette = cv2.kmeans(pixels, n_colors, None, criteria, 10, flags)
+    _, counts = np.unique(labels, return_counts=True)
+
+    dominant = palette[np.argmax(counts)]
+    return dominant
+
+def get_mean_color(img):
+    return img.mean(axis=0).mean(axis=0)
+
+
+def create_img_set(path, gray = False):
+    '''
+    Je créé une liste d'image à partir d'images d'un dossier
+
+    '''
+    #Gather images
+    images = []
+    color_set = [0] * 256 #Je créé une liste vide
+    for filename in os.listdir(path):
+        if not 0 in color_set:
+            return color_set
+
+        if ".png" in filename or ".jpg" in filename:
+            img = cv2.imread(os.path.join(path,filename))
+            if img is not None:
+                img = cv2.resize(img,(int(1/ratio),int(1/ratio)))
+                if gray == True:
+                    img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+                    mean_col = int(get_mean_color(img))
+                    color_set[mean_col] = img
+                    print(f"traitement de {filename}")
+                    continue
+                images.append(img)
+    return color_set
+
+
+
+def big_pixels(img,ratio = 0.1,images = None):
+    '''
+    Réduit le nombre de pixels d'une image
+    Si je fournis une liste d'images, elle affiche les images en petit
+    à la place des pixels
+    '''
+    img_width = img.shape[1]
+    img_height = img.shape[0]
+    width = int(img_width * ratio)
+    height = int(img_height * ratio)
+    dim = (width,height)
+    small = cv2.resize(img,dim)
+    image = np.zeros(img.shape,np.uint8)
+
+#Ici je remplit mon image en gris
+    if len(img.shape) < 3:
+        for x in range(width):
+            for y in range(height):
+                if images == None:
+                    cv2.rectangle(image,(int(x/ratio),int(y/ratio)),
+                                (int((x+1)/ratio),int((y+1)/ratio)), int(small[y,x]),
+                                 thickness = -1)
+                else:
+                    index = int(small[y,x])
+                    if type(images[index]) == type(int(1)):
+                        #Je n'ai pas d'images
+                        cv2.rectangle(image,(int(x/ratio),int(y/ratio)),
+                                    (int((x+1)/ratio),int((y+1)/ratio)),
+                                     int(small[y,x]), thickness = -1)
+                    else:
+                        image[int(y/ratio):int((y+1)/ratio), int(x/ratio):int((x+1)/ratio)] = images[index]
+        return image
+#Else, l'image est en couleur
+    for x in range(width):
+        for y in range(height):
+            r = int(small[y,x,0])
+            g = int(small[y,x,1])
+            b = int(small[y,x,2])
+            if images == None:
+                cv2.rectangle(image,(int(x/ratio),int(y/ratio)),(int((x+1)/ratio),int((y+1)/ratio)), (r,g,b), thickness = -1 )
+            #thickness = -1 remplit le rectangle
+    return image
+
+
 
 #Réduit la taille de l'image
     # result = reduce_pixel(thresh,5,1)
@@ -107,3 +201,43 @@ def strided_convolution(image, weight, stride):
 def gray_to_ascii():
     pass
 #Idée de fonction, transformer gray scale en ascii
+#----------------------------------------------------------------------------
+'''MAIN '''
+ratio = 0.05
+
+# Connects to your computer's default camera
+cap = cv2.VideoCapture(0)
+
+# Automatically grab width and height from video feed
+# (returns float which we need to convert to integer for later on!)
+width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+
+#Le téléchargement (même de 50 images) PREND DU TEMPS
+
+# print("Je démarre le téléchargement")
+#img_set = create_img_set("C:\\Users\\william\\OneDrive\\Images\\Pellicule",True)
+#img_set = create_img_set("W:\\2020\\Ete\\Chalet TeamSki",True)
+# print("J'ai fini")
+
+
+
+
+while True:
+
+    ret, frame = cap.read()
+    gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
+
+    result = big_pixels(frame,ratio)
+
+    cv2.imshow('resultat',result)
+    # print(get_dominant_color(result)) #Très long
+
+    # print(get_mean_color(frame))
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+# When everything done, release the capture and destroy the windows
+cap.release()
+cv2.destroyAllWindows()

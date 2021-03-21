@@ -23,6 +23,13 @@ En effet, j'ai écrit les rectangles avant et maintenant je travaille pour
 transformer tout ça en objet.
 (le but étant de pouvoir transférer les images qui seront stocké dans les objets)
 Tracasss ça va fonctionner
+
+
+Je dois bien travailler la persévérance.
+Si je détecte un mouvement, il faut l'identifier et le garder.
+Si je détecte une main, je dois la garder et l'identifier tant qu'elle est à l'écran.
+Même si je ne la trouve plus, je sais où elle était et je peux essayer de la retrouver
+avec le mouvement
 '''
 # ----------------------------------------------------------------------------
 '''OBJECTS'''
@@ -164,23 +171,26 @@ def sqrt_dist(x1, y1, x2 ,y2):
 
 
 def get_contours(movement):
+    '''
+    L'image doit être blanche et le fond noir pour trouver les contours
+    '''
     blurred = hole_filling(movement)
     contours, _ = cv2.findContours(blurred,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     return contours
 
-def extract_movement_zones(img,contours):
-    '''
-SEMBLABLE A L'OBJET ZONES
-    img = image dans laquelle on va découper des zones en mouvement
-    contours= liste des coordonnées des zones en mouvement
-    '''
-    zones = [] #sections d'images en mouvement
-    for contour in contours:
-        (x, y, w, h) = cv2.boundingRect(contour)
-        new_zone = img[y:y+h, x:x+w]
-        zones.append(new_zone)
-        cv2.imshow('Mouvement',new_zone)
-    return zones
+# def extract_movement_zones(img,contours):
+#     '''
+# SEMBLABLE A L'OBJET ZONES
+#     img = image dans laquelle on va découper des zones en mouvement
+#     contours= liste des coordonnées des zones en mouvement
+#     '''
+#     zones = [] #sections d'images en mouvement
+#     for contour in contours:
+#         (x, y, w, h) = cv2.boundingRect(contour)
+#         new_zone = img[y:y+h, x:x+w]
+#         zones.append(new_zone)
+#         cv2.imshow('Mouvement',new_zone)
+#     return zones
 
 def show_movement_zones(img,contours):
     for contour in contours:
@@ -222,6 +232,8 @@ def draw_contours(img,contours):
     '''
     new_img = img.copy()
 
+    # -1 signifie qu'on va dessiner tous les contours
+    #Si on met une autre valeur, c'est l'index du contour à dessiner
     cv2.drawContours(new_img,contours, -1, (0,255,0), 2)
     write_on_image(new_img,str(len(contours)))
     return new_img
@@ -327,27 +339,29 @@ if __name__ == "__main__":
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # Detection de mouvement
-        movement = movement_detect(gray,prev_gray) #Noir et blanc avec mvt
-        contours = get_contours(movement)
-
-        contour = draw_contours(frame,contours) # Contour du mvt sur rgb
-        rect = draw_rect_contours(frame,contours,700) #Carré sur mvt
-        cv2.imshow('Contours',contour)
-        cv2.imshow('Rectangles',rect)
+        # movement = movement_detect(gray,prev_gray) #Noir et blanc avec mvt
+        #contours = get_contours(movement)
+        #
+        # contour = draw_contours(frame,contours) # Contour du mvt sur rgb
+        # rect = draw_rect_contours(frame,contours,700) #Carré sur mvt
+        # cv2.imshow('Contours',contour)
+        # cv2.imshow('Rectangles',rect)
 
     ##Différence entre les deux fonctions d'analyse de Mouvement
-        # movement1 = movement_detect(gray,prev_gray,150,1)
-        # movement2 = movement_detect(frame,prev,20,2)
-        # cv2.imshow('Sol 1', movement1)
-        # cv2.imshow('Sol 2', movement2)
+        movement1 = movement_detect(gray,prev_gray,150,1)
+        movement2 = movement_detect(frame,prev,20,2)
+        cv2.imshow('Sol 1', movement1)
+        cv2.imshow('Sol 2', movement2)
+        #contours = get_contours(movement1)
+        #print(contours[0])
 
         #show_movement_zones(frame,contours)
 
-        zones = generate_zones(contours)
-        #Toutes mes zones sont créées, mtn je dois les dessiner sur l'image et l'afficher
-        img_by_zones = draw_all_zones(frame, zones)
-        cv2.imshow('Dessin',img_by_zones)
-        #
+        # zones = generate_zones(contours)
+        # #Toutes mes zones sont créées, mtn je dois les dessiner sur l'image et l'afficher
+        # img_by_zones = draw_all_zones(frame, zones)
+        # cv2.imshow('Dessin',img_by_zones)
+        # #
 
         #Pas fonctionnel
         # create_zones_img(frame,zones)
