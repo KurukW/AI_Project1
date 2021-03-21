@@ -2,6 +2,9 @@ import cv2
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 import os
+import math
+from skelet import resize
+import time
 
 '''
 Quelques fonctions de traitement d'images qui n'étaient pas nécessaire
@@ -56,6 +59,69 @@ def apply_kernel(img):
 
     #Essayer de trouver des filtres de dilatation, erosion et dilatation-erosion
     return cv2.filter2D(img,-1,kernel)
+
+def distance_transform(img):
+    '''
+    Prend une image en noir et blanc en entrée et sort une image en grayscale
+    avec la fonction de distance transform
+
+
+    Tout sera blanc au dessus de 255 pixels
+    '''
+    #Première étape: fabriquer l'image de sortie avec des 0 dans les pixels noirs
+
+    #On ajoute un pixel autour pour ne pas avoir de problèmes
+    height, width = img.shape[:2]
+    bottom = img[height-2:height, 0:width]
+    mean = cv2.mean(bottom)[0]
+
+    bordersize = 1
+    dt = cv2.copyMakeBorder(
+    img,
+    top=bordersize,
+    bottom=bordersize,
+    left=bordersize,
+    right=bordersize,
+    borderType=cv2.BORDER_CONSTANT,
+    value=[mean, mean, mean]
+    )
+
+    max_val = 0
+    #Deuxième étape:  passe de gauche à droite et de haut en bas pour définir la distance
+    for y in range(1,height+1):
+        for x in range(1,width+1):
+            '''
+            On test si on est = 0, sinon on prend le minimum entre le haut et la gauche
+            et on fait plus un à cette valeur
+            '''
+            if dt[y, x] != 0:
+                dt[y, x] = min(dt[y-1, x], dt[y ,x-1]) + 1
+
+    #Troisième étape:  passe de droite à gauche et de bas en haut pour définir la distance
+    for y in range(height, 0, -1):
+        for x in range(width, 0, -1):
+            neigh = min(dt[y+1, x], dt[y ,x+1])
+            if dt[y, x] != 0 and neigh < dt[y, x]:
+                dt[y, x] = neigh + 1
+            max_val = max(max_val,dt[y,x])
+
+
+    #ON RETIRE LE PIXEL QU'ON A AJOUTE AU DEBUT
+    #au pire on le garde
+
+
+    #Standardisation
+    ratio = int(255/max_val)
+    #Le int pourrait poser problème
+    dt *= ratio
+
+
+    return dt
+
+
+
+
+
 
 
 
@@ -221,17 +287,34 @@ height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 #img_set = create_img_set("W:\\2020\\Ete\\Chalet TeamSki",True)
 # print("J'ai fini")
 
-
+#Je vais chercher l'image du cercle et je lui donne une taille correcte
+circ = cv2.imread("images\\circle.jpg")
+circ_big = resize(circ,10,True)
+_,circ_thresh = cv2.threshold(circ_big,200,255,cv2.THRESH_BINARY)
+circ_dt = distance_transform(circ_thresh)
 
 
 while True:
 
+
     ret, frame = cap.read()
     gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
 
-    result = big_pixels(frame,ratio)
+    _,thresh = cv2.threshold(gray,125,255,cv2.THRESH_BINARY_INV)
+    small = resize(thresh,0.1,False)
+    #ici je modifie la taille de mon image
 
+
+    start = time.time()
+    #Ici je calcule la distance
+    result = distance_transform(small)
     cv2.imshow('resultat',result)
+    cv2.imshow('big',small)
+
+    end = time.time()
+    print(f"La fonction DT et l'affichage a prit {end-start} secondes")
+    # cv2.imshow('initial',circ_thresh)
+    # cv2.imshow('resultat',circ_dt)
     # print(get_dominant_color(result)) #Très long
 
     # print(get_mean_color(frame))
