@@ -41,7 +41,7 @@ def resize_and_draw_contours(img,ratio = 2):
 
     '''
     img_big, img_gray = resize(img,ratio,True)
-    img_cont = get_contours(img_gray) #cleared function to find output
+    img_cont = get_contours(img_gray) #get array with contours coordinates
     img_output = cv2.drawContours(img_big,img_cont,-1,(0,255,0))
     img_contours = np.zeros((img_big.shape[1],img_big.shape[0]),dtype=np.uint8)
     cv2.drawContours(img_contours,img_cont,-1,(255,255,255))
@@ -68,6 +68,84 @@ def draw_contours_points(contours,shape=(480,480)):
     return new_cont,new_shape
 
 
+
+def get_voronoi(img,ratio = 2,step = 3):
+    start = time.time()
+    #Voronoi est une librairie qui va calculer voronoi pour nous
+    #Je traduis mes points manuellement
+
+    #Eroder mon image pour avoir une version plus petite pour avoir moins de
+    # mauvais traits
+    blurred = blur_thresh(img)
+    _,_, blurred_contours = resize_and_draw_contours(blurred,ratio)
+    img,img_contours_only,img_contours = resize_and_draw_contours(img,ratio)
+
+    points = [elt[0] for elt in img_contours[0]]
+    vor = Voronoi(points)
+    fig = voronoi_plot_2d(vor)
+    # plt.show()
+    # print(scipy.spatial.__file__) #Permet de trouver la localisation sur son pc
+
+    #Autre solution: dessin sur un cv2
+    vd = np.zeros(img.shape)#voronoi diagram
+
+    # cv2.polylines(vd,vor.vertices,True,(0,255,255))
+    vor_points = vor.vertices #Points du futur squelette
+    vor_indices_dirty = vor.ridge_vertices #Indice indiquant comment dessiner les droites
+    vor_indices = []
+    #Nettoyage de vor_indices, on a pas besoin des élmts avec -1
+    for segment in vor_indices_dirty:
+        good = True
+        for indice in segment:
+            if indice == -1:
+                good = False
+                break
+        if good:
+            vor_indices.append(segment)
+
+    #Première étape, il y a tous les traites de Voronoi
+    if step == 1:
+        for segment in vor_indices:
+            pt1 = (int(vor_points[segment[0]][0]), int(vor_points[segment[0]][1]))
+            pt2 = (int(vor_points[segment[1]][0]), int(vor_points[segment[1]][1]))
+            for contour in img_contours:
+                if cv2.pointPolygonTest(contour,pt1,False)>0 and cv2.pointPolygonTest(contour,pt2,False)>0:
+                    color = (0,255,0)
+                    break
+                else:
+                    color = (0,0,255)
+            # white = (255,255,255)
+            cv2.line(vd,pt1,pt2,color,1)
+
+    #Deuxième étape, il y a seulement les traits à l'intérieur de la forme
+    if step == 2:
+        for segment in vor_indices:
+            pt1 = (int(vor_points[segment[0]][0]), int(vor_points[segment[0]][1]))
+            pt2 = (int(vor_points[segment[1]][0]), int(vor_points[segment[1]][1]))
+            for contour in img_contours:
+                if cv2.pointPolygonTest(contour,pt1,False)>0 and cv2.pointPolygonTest(contour,pt2,False)>0:
+                    color = (0,255,0)
+                    cv2.line(vd,pt1,pt2,color,1)
+                    break
+
+    #Troisième étape, il y a seulement les traits à l'intérieur de la forme
+    if step == 3:
+        for segment in vor_indices:
+            pt1 = (int(vor_points[segment[0]][0]), int(vor_points[segment[0]][1]))
+            pt2 = (int(vor_points[segment[1]][0]), int(vor_points[segment[1]][1]))
+            for contour in blurred_contours:
+                if cv2.pointPolygonTest(contour,pt1,False)>0 and cv2.pointPolygonTest(contour,pt2,False)>0:
+                    color = (0,255,0)
+                    cv2.line(vd,pt1,pt2,color,1)
+                    break
+
+
+
+
+    end = time.time()
+    print(f"Voronoi a prit {end-start} secondes")
+    return vd
+
 #----------------------------------------------------------------------------
 '''Main code '''
 if __name__ == '__main__':
@@ -78,7 +156,7 @@ if __name__ == '__main__':
     _,plant = cv2.threshold(plant,150,255,cv2.THRESH_BINARY_INV)
     plant,plant_contour_only,plant_contours = resize_and_draw_contours(plant,1)
 
-    rect_big, rect_cont, rect_contours = resize_and_draw_contours(rect,10)
+    rect_big, rect_contour_only, rect_contours = resize_and_draw_contours(rect,10)
     circ_big, circ_cont, _ = resize_and_draw_contours(circ,10)
 
     new_cont,new_shape = draw_contours_points(rect_contours)
@@ -86,32 +164,7 @@ if __name__ == '__main__':
     blur = blur_thresh(plant,1,15,150)
 
 
-
-    #Voronoi est une librairie qui va calculer voronoi pour nous
-    #Je traduis mes points manuellement
-
-    points = [elt[0] for elt in plant_contours[0]]
-    vor = Voronoi(points)
-    fig = voronoi_plot_2d(vor)
-    # plt.show()
-    # print(scipy.spatial.__file__) #Permet de trouver la localisation sur son pc
-
-    #Autre solution: dessin sur un cv2
-    vd = np.zeros(plant.shape)#voronoi diagram
-
-    # cv2.polylines(vd,vor.vertices,True,(0,255,255))
-    vor_points = vor.vertices #Points du futur squelette
-    for i,point in enumerate(vor_points):
-        pt1 = (int(point[0]),int(point[1]))
-        # pt2 = (100,100)
-        # if i == (len(vor_points)-1):
-        #     pt2 = (int(vor_points[0][0]),int(vor_points[0][1]))
-        # else:
-        #     pt2 = (int(vor_points[i+1][0]),int(vor_points[i+1][1]))
-        # cv2.line(vd,pt1,pt2,(255,255,255),2)
-        cv2.circle(vd,pt1,0,(255,255,255),-1)
-    # print(vor.vertices)
-
+    vd = get_voronoi(plant,1)
 
 
 
@@ -125,6 +178,8 @@ if __name__ == '__main__':
         # if cv2.waitKey(1) & 0xFF == ord('n'):
         #     blur = blur_thresh(blur,1,15,150)
         #
+
+
         cv2.imshow('shape_rect',plant)
         cv2.imshow('voronoi',vd)
         cv2.imshow('contours',plant_contour_only)
@@ -179,14 +234,20 @@ sij est donc un segment de droite.
 
 
 
-
-Si on est amené à fabriquer une fonction de DT nous même. Il ne faut pas comparer à tous les pixels
-Il faut aggrandir des cercles (comme la vision de W du raytracing).
-Et dès que le cercle touche un pixel noir, on s'arrête et on mesure la distance
-
+Fonction DT (déjà construite et pas nécessaire finalement)
 Meilleure solution : http://vision.cs.utexas.edu/378h-fall2015/slides/lecture4.pdf
 page 4:
 Deux passes, afin de définir la distance.
+
+
+
+
+EXPLICATIONS DE SCIPY.SPATIAL.VORONOI
+
+vor.vertices: Liste des points qui sont les extrémités de segments de Voronoi
+vor.ridge_vertices: Défini chaque segments, les deux points sont les indices des vertices.
+-1 signifie que le segment n'est pas fermé et qu'il va à l'infini.
+Cela ne nous intéresse pas, on veut seulement les segments fermés
 
 
 

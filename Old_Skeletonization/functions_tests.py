@@ -114,7 +114,7 @@ def distance_transform(img):
     ratio = int(255/max_val)
     #Le int pourrait poser problème
     dt *= ratio
-    
+
     return dt
 
 
