@@ -14,11 +14,6 @@ J'ai juste fait quelques tests, rien de concluant pour l'instant
 
 
 
-
-
-
-
-
 def blur_thresh(img,passe = 1,kernel_size = 3,thresh = 200):
     blur = img.copy()
     for i in range(passe):

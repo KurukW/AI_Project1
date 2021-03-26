@@ -8,3 +8,7 @@ Prendre une architecture qui existe et qui fonctionne
 - Favoriser plusieurs petits conv layers plutôt qu'une seule grande
 - Utiliser ce qui fonctionne bien sur "ImageNet"
 - Dans la liste des modèles existants, GoogLeNet semble être le plus compact et fonctionnel récemment
+
+
+
+Tensorflow peut gérer LSTM: https://www.tensorflow.org/guide/keras/rnn

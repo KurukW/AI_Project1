@@ -106,7 +106,7 @@ class Zones:
 
 # ----------------------------------------------------------------------------
 '''FONCTIONS '''
-def movement_detect(now,prev,threshold = 150,sol = 1):
+def movement_detect(now,prev,threshold = 150,sol = 2):
     '''
     Now et Prev sont deux images qui se suivent.
     (Elles doivent être en nuance de gris)
@@ -118,7 +118,8 @@ def movement_detect(now,prev,threshold = 150,sol = 1):
         next = (diff*255).astype("uint8") #Utile pour le threshold
         result = cv2.threshold(next,threshold,255,cv2.THRESH_BINARY_INV)
         return result[1]
-    #Sol 2
+
+    #Sol 2 #Résultat plus propre et 10x plus rapide
     diff = cv2.absdiff(now,prev)
     result = cv2.threshold(diff,threshold,255,cv2.THRESH_BINARY)
     output = cv2.cvtColor(result[1],cv2.COLOR_BGR2GRAY)
@@ -223,7 +224,7 @@ def write_on_image(img,text, color = (255,255,255)):
         fontScale,
         fontColor,
         lineType)
-        
+
 def draw_contours(img,contours):
     '''
     Dessine les contours des zones en mouvement
@@ -328,8 +329,6 @@ if __name__ == "__main__":
     ret, frame = cap.read()
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-
-
     while True:
         # Capture frame-by-frame
         prev_gray = gray #J'enregistre la dernière image
@@ -339,19 +338,17 @@ if __name__ == "__main__":
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # Detection de mouvement
-        # movement = movement_detect(gray,prev_gray) #Noir et blanc avec mvt
-        #contours = get_contours(movement)
+        movement = movement_detect(frame,prev,20)
+        contours = get_contours(movement)
         #
-        # contour = draw_contours(frame,contours) # Contour du mvt sur rgb
-        # rect = draw_rect_contours(frame,contours,700) #Carré sur mvt
-        # cv2.imshow('Contours',contour)
-        # cv2.imshow('Rectangles',rect)
+        contour = draw_contours(frame,contours) # Contour du mvt sur rgb
+        rect = draw_rect_contours(frame,contours,700) #Carré sur mvt
+        cv2.imshow('Contours',contour)
+        cv2.imshow('Rectangles',rect)
 
     ##Différence entre les deux fonctions d'analyse de Mouvement
-        movement1 = movement_detect(gray,prev_gray,150,1)
-        movement2 = movement_detect(frame,prev,20,2)
-        cv2.imshow('Sol 1', movement1)
-        cv2.imshow('Sol 2', movement2)
+
+        cv2.imshow('Mouvement', movement)
         #contours = get_contours(movement1)
         #print(contours[0])
 
