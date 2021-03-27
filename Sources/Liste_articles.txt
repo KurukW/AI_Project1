@@ -11,3 +11,9 @@ https://sci-hub.st/https://doi.org/10.1016/S0020-0190(01)00336-2
 https://sci-hub.st/10.1109/TPAMI.1982.4767267
 https://sci-hub.st/10.1147/rd.313.0373
 https://sci-hub.st/10.1147/rd.313.0361
+
+Alexnet : https://kr.nvidia.com/content/tesla/pdf/machine-learning/imagenet-classification-with-deep-convolutional-nn.pdf
+install the library : https://pypi.org/project/alexnet-pytorch/
+
+https://sci-hub.st/10.1109/TPAMI.2012.59
+article de référence ? :https://sci-hub.st/10.1109/ACCESS.2017.2778011
