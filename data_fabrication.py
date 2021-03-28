@@ -1,5 +1,6 @@
 import cv2
 import os
+import time
 '''
 Ce programme va nous permettre de fabriquer des images
 Pour démarrer l'enregistrement, appuyer sur "r"
@@ -11,9 +12,10 @@ Si on démarre le programme sans enregistrer de vidéo, on va créer un fichier 
 
 label = "Video de nous" #LE PLUS IMPORTANT
 
+duree_s = 3 #Durée de la vidéo quand on enregistre avec k
 video_name = "" #Si c'est vide, le numéro est incrémenté à chaque fois: "video_X.avi"
 folder = "DATA\\Videos"
-framerate = 20
+framerate = 25
 #Framerate du rendu final. Cela ne définit pas le nombre d'images qu'on lui donne.
 #Si on a un framerate de 20 et la vidéo de 10. ça veut dire qu'une seconde d'enregistrement
 # donne 20 images et donc 2 secondes de vidéo
@@ -55,6 +57,7 @@ def write_label(label,file_name):
 #-------------------------------------------------------------------------------
 '''MAIN CODE '''
 if __name__ == "__main__":
+    global video_to_saved
     # Connects to your computer's default camera
     cap = cv2.VideoCapture(0)
 
@@ -63,7 +66,8 @@ if __name__ == "__main__":
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     saving = False
-
+    soon_saving = False
+    video_to_saved = False
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
 
     #Compte le nombre de fichier
@@ -72,7 +76,7 @@ if __name__ == "__main__":
 
     #Fabrication du nom de la vidéo
     if video_name == "": #Nom automatique
-        video_name = "video_" + str(file_count) + ".avi"
+        video_name = f"video_{str(file_count)}.avi"
 
     if folder == "":
         file_name = video_name
@@ -82,34 +86,68 @@ if __name__ == "__main__":
     #Création du fichier de sortie
     out = cv2.VideoWriter(file_name,fourcc, framerate,(width,height))
 
-    #Créer le label pour la nouvelle vidéo
-    write_label(label,video_name)
+
 
     while True:
+
+
+
         ret, frame = cap.read()
         # Pendant 1 seconde, on attend et on regarde si on a appuyé sur une touche
         key = cv2.waitKey(1)
 
         #Défini si on enregistre ou pas
         if key == ord('r'):
-            saving = True #Démarre enregistrement
+            saving = 1 #Démarre enregistrement
         if key == ord('t'):
-            saving = False #Arrête enregistrement
+            saving = 0 #Arrête enregistrement
+        if key == ord('k'):
+            soon_saving = True
+            start_soon = time.time() #Démarre timer avant enregistrement chronométré
+
+
+
 
         #Enregistre
-        if saving:
-            s = "Enregistrement"
+        if saving == 1: #Enregistrement indéfini
+            s = "Enregistrement "
+            video_to_saved = True
+            color = (0,0,255)
             out.write(frame)
-        else:
+        elif saving == 2: #Enregistrement défini
+            s = "Enregistrement "
+            video_to_saved = True
+            out.write(frame)
+
+            #Gestion du timer
+            now = time.time()
+            time_left = duree_s - (now - start)
+            time_left_f = "{:.2f}".format(time_left)
+            s += time_left_f
+            color = (0,0,255)
+            if time_left <= 0:
+                saving = 0
+        else: #Pas enregistrement
             s = "Nothing"
+            color = (255,255,255)
+
+        #Timer avant enregistrement
+        if soon_saving:
+            now = time.time()
+            time_left = 3 - (now - start_soon)
+            time_left_f = "{:.2f}".format(time_left)
+            s = time_left_f
+            if time_left <= 0:
+                soon_saving = False
+                saving = 2
+                start = time.time()
+
+
 
         #à partir d'ici, les modifications sur frame n'auront pas d'effet sur l'enregistrement
 
-
-
-
         #indique à l'image si on enregistre (non visible sur la vidéo)
-        write_on_image(frame,s)
+        write_on_image(frame,s,color)
 
         cv2.imshow('frame',frame)
 
@@ -121,3 +159,13 @@ if __name__ == "__main__":
     # When everything done, release the capture and destroy the windows
     cap.release()
     cv2.destroyAllWindows()
+
+
+    #Ferme le fichier vidéo
+    out.release()
+    #Créer le label pour la nouvelle vidéo
+    if video_to_saved:
+        write_label(label,video_name)
+    else:
+        #Il faut supprimer la vidéo qu'on vient de faire
+        os.remove(file_name)

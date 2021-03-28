@@ -3,7 +3,6 @@ Dans ce script python on va fabriquer notre modèle.
 On utilise les librairies Tensorflow et Keras (comme en cours).
 Elles ont des RNN intégrées qui vont nous servir à analyser les vidéos.
 
-
 '''
 
 import tensorflow as tf
@@ -25,19 +24,21 @@ Insertion des données
 '''
 Traitement des données
 '''
-
+#Est-ce qu'il faut fixer la durée de la vidéo?
 
 
 '''
 Fabrication/Design du modèle
 '''
-
+#Inspiration des plus grands
+#CNN?
+#LSTM(RNN)?
 
 
 '''
 Train du modèle
 '''
-
+#fit()
 
 
 '''

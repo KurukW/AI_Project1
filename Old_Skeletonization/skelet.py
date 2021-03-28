@@ -98,6 +98,14 @@ def get_voronoi(img,ratio = 2,step = 3):
         if good:
             vor_indices.append(segment)
 
+    #comme étape 1 mais sans couleurs
+    if step == 0:
+        for segment in vor_indices:
+            pt1 = (int(vor_points[segment[0]][0]), int(vor_points[segment[0]][1]))
+            pt2 = (int(vor_points[segment[1]][0]), int(vor_points[segment[1]][1]))
+            white = (255,255,255)
+            cv2.line(vd,pt1,pt2,white,1)
+
     #Première étape, il y a tous les traites de Voronoi
     if step == 1:
         for segment in vor_indices:
@@ -147,10 +155,13 @@ if __name__ == '__main__':
     rect = cv2.imread("images\\rectangle.jpg")
     circ = cv2.imread("images\\circle.jpg")
     plant = cv2.imread("images\\plant.jpg")
+    hand_init = cv2.imread("images\\hand.png")
 
     _,plant = cv2.threshold(plant,150,255,cv2.THRESH_BINARY_INV)
-    plant,plant_contour_only,plant_contours = resize_and_draw_contours(plant,1)
+    _,hand = cv2.threshold(hand_init,150,255,cv2.THRESH_BINARY_INV)
 
+    plant, plant_contour_only, plant_contours = resize_and_draw_contours(plant,1)
+    hand, hand_contour_only, hand_contours = resize_and_draw_contours(hand,1)
     rect_big, rect_contour_only, rect_contours = resize_and_draw_contours(rect,10)
     circ_big, circ_cont, _ = resize_and_draw_contours(circ,10)
 
@@ -159,8 +170,16 @@ if __name__ == '__main__':
     blur = blur_thresh(plant,1,15,150)
 
 
-    vd = get_voronoi(plant,1)
+    vd = get_voronoi(hand,1)
+    vd0 = get_voronoi(hand,1,0)
+    vd1 = get_voronoi(hand,1,1)
+    vd2 = get_voronoi(hand,1,2)
+    cv2.imwrite('contours.jpg',hand_contour_only)
 
+    # cv2.imwrite('vd0.jpg',vd0)
+    # cv2.imwrite('vd1.jpg',vd1)
+    # cv2.imwrite('vd2.jpg',vd2)
+    # cv2.imwrite('vd3.jpg',vd)
 
 
 
@@ -175,9 +194,15 @@ if __name__ == '__main__':
         #
 
 
-        cv2.imshow('shape_rect',plant)
+        cv2.imshow('shape_rect',hand_init)
         cv2.imshow('voronoi',vd)
-        cv2.imshow('contours',plant_contour_only)
+        # cv2.imshow('contours',hand_contour_only)
+        cv2.imshow('vd0',vd0)
+        cv2.imshow('vd1',vd1)
+        cv2.imshow('vd2',vd2)
+
+
+
         # cv2.imshow('blurred',blur)
 
         # cv2.imshow('cont_rect',rect_cont)
