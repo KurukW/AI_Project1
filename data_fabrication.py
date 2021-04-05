@@ -5,14 +5,15 @@ import time
 Ce programme va nous permettre de fabriquer des images
 Pour démarrer l'enregistrement, appuyer sur "r"
 Pour arrêter l'enregistrement, appuyer sur "t"
+Pour démarrer enregistrement chronométré, appuyer sur "k"
 
 Si on démarre le programme sans enregistrer de vidéo, on va créer un fichier vidéo vide, c'est mal.
 '''
 
 
-label = "Video de nous" #LE PLUS IMPORTANT
+label = "Ferme le poing" #LE PLUS IMPORTANT
 
-duree_s = 3 #Durée de la vidéo quand on enregistre avec k
+duree_s = 2 #Durée de la vidéo quand on enregistre avec k
 video_name = "" #Si c'est vide, le numéro est incrémenté à chaque fois: "video_X.avi"
 folder = "DATA\\Videos"
 framerate = 25
