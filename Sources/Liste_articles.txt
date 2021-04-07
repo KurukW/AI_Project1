@@ -14,6 +14,11 @@ https://sci-hub.st/10.1147/rd.313.0361
 
 Alexnet : https://kr.nvidia.com/content/tesla/pdf/machine-learning/imagenet-classification-with-deep-convolutional-nn.pdf
 install the library : https://pypi.org/project/alexnet-pytorch/
+implementer avec keras : https://analyticsindiamag.com/hands-on-guide-to-implementing-alexnet-with-keras-for-multi-class-image-classification/
 
 https://sci-hub.st/10.1109/TPAMI.2012.59
 article de référence ? :https://sci-hub.st/10.1109/ACCESS.2017.2778011
+
+article a l'origine du LSTM : https://sci-hub.st/https://doi.org/10.1162/neco.1997.9.8.1735
+explication du lstm : https://www.machinecurve.com/index.php/2020/12/29/a-gentle-introduction-to-long-short-term-memory-networks-lstm/
+https://www.machinecurve.com/index.php/2021/01/07/build-an-lstm-model-with-tensorflow-and-keras/
