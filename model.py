@@ -33,7 +33,7 @@ Insertion des données
 Traitement des données
 '''
 #Est-ce qu'il faut fixer la durée de la vidéo?
-
+#Le réseau neuronale prend tout seul les images qui l'intéressent (nb de FPS)
 
 '''
 Fabrication/Design du modèle
