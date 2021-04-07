@@ -78,7 +78,7 @@ def get_voronoi(img,ratio = 2,step = 3):
     points = [elt[0] for elt in img_contours[0]]
     vor = Voronoi(points)
     fig = voronoi_plot_2d(vor)
-    # plt.show()
+    #plt.show()
     # print(scipy.spatial.__file__) #Permet de trouver la localisation sur son pc
 
     #Autre solution: dessin sur un cv2
@@ -174,7 +174,7 @@ if __name__ == '__main__':
     vd0 = get_voronoi(hand,1,0)
     vd1 = get_voronoi(hand,1,1)
     vd2 = get_voronoi(hand,1,2)
-    cv2.imwrite('contours.jpg',hand_contour_only)
+    #cv2.imwrite('contours.jpg',hand_contour_only)
 
     # cv2.imwrite('vd0.jpg',vd0)
     # cv2.imwrite('vd1.jpg',vd1)
