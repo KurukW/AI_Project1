@@ -121,9 +121,14 @@ def movement_detect(now,prev,threshold = 150,sol = 2):
 
     #Sol 2 #Résultat plus propre et 10x plus rapide
     diff = cv2.absdiff(now,prev)
-    result = cv2.threshold(diff,threshold,255,cv2.THRESH_BINARY)
-    output = cv2.cvtColor(result[1],cv2.COLOR_BGR2GRAY)
+    _,result = cv2.threshold(diff,threshold,255,cv2.THRESH_BINARY)
+    output = cv2.cvtColor(result,cv2.COLOR_BGR2GRAY)
     return output
+
+def colored_movement(frame,movement):
+    return cv2.bitwise_and(frame,frame,mask = movement)
+
+
 
 def sqrt_dist(x1, y1, x2 ,y2):
     '''
@@ -339,15 +344,16 @@ if __name__ == "__main__":
 
     # Detection de mouvement
         movement = movement_detect(frame,prev,20)
-        contours = get_contours(movement)
+        colored = colored_movement(frame,movement)
+        #contours = get_contours(movement)
         #
-        contour = draw_contours(frame,contours) # Contour du mvt sur rgb
-        rect = draw_rect_contours(frame,contours,700) #Carré sur mvt
-        cv2.imshow('Contours',contour)
-        cv2.imshow('Rectangles',rect)
+        # contour = draw_contours(frame,contours) # Contour du mvt sur rgb
+        # rect = draw_rect_contours(frame,contours,700) #Carré sur mvt
+        # cv2.imshow('Contours',contour)
+        # cv2.imshow('Rectangles',rect)
 
     ##Différence entre les deux fonctions d'analyse de Mouvement
-
+        cv2.imshow('colored',colored)
         cv2.imshow('Mouvement', movement)
         #contours = get_contours(movement1)
         #print(contours[0])
