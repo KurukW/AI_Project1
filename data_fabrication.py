@@ -11,7 +11,7 @@ Si on démarre le programme sans enregistrer de vidéo, on va créer un fichier 
 '''
 
 
-label = "Ferme le poing" #LE PLUS IMPORTANT
+label = "Doigts croises paumes" #LE PLUS IMPORTANT
 
 duree_s = 2 #Durée de la vidéo quand on enregistre avec k
 video_name = "" #Si c'est vide, le numéro est incrémenté à chaque fois: "video_X.avi"
