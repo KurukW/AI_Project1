@@ -11,7 +11,7 @@ Si on démarre le programme sans enregistrer de vidéo, on va créer un fichier 
 '''
 
 
-label = "Doigts croises paumes" #LE PLUS IMPORTANT
+label = "Faire coucou" #LE PLUS IMPORTANT
 
 duree_s = 2 #Durée de la vidéo quand on enregistre avec k
 video_name = "" #Si c'est vide, le numéro est incrémenté à chaque fois: "video_X.avi"
@@ -135,7 +135,7 @@ if __name__ == "__main__":
         #Timer avant enregistrement
         if soon_saving:
             now = time.time()
-            time_left = 3 - (now - start_soon)
+            time_left = 2 - (now - start_soon)
             time_left_f = "{:.2f}".format(time_left)
             s = time_left_f
             if time_left <= 0:
