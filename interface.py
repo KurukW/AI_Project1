@@ -19,6 +19,8 @@ class App:
      self.window = window
      self.window.title(window_title)
      self.video_source = video_source
+     #self.window.resizable(0,0) #Empêche de modifier la taille
+     self.window.geometry("1200x600")
 
      # open video source (by default this will try to open the computer webcam)
      self.vid = MyVideoCapture(self.video_source)
@@ -26,13 +28,21 @@ class App:
      # Create a canvas that can fit the above video source size
      self.canvas = tkinter.Canvas(window, width = int(self.vid.width*ratio), height = int(self.vid.height*ratio))
      self.canvas.pack()
+     self.canvas.place(x = 550,y = 50)
 
      self.canvas2 = tkinter.Canvas(window, width = int(self.vid.width*ratio), height = int(self.vid.height*ratio))
-     self.canvas2.pack()
+     #self.canvas2.pack()
+     #self.canvas2.place(bordermode = tkinter.OUTSIDE, x = 600, y = 100)
+
+     self.window.bind_all('p', self.snapshot)
+
+
+
 
      # Button that lets the user take a snapshot
      self.btn_snapshot=tkinter.Button(window, text="Snapshot", width=50, command=self.snapshot)
      self.btn_snapshot.pack(anchor=tkinter.CENTER, expand=True)
+     self.btn_snapshot.place(x=100,y=300)
 
      # After it is called once, the update method will be automatically called every delay milliseconds
      self.delay = 15 #Délai entre chaque image
@@ -40,7 +50,7 @@ class App:
 
      self.window.mainloop()
 
- def snapshot(self):
+ def snapshot(self, *args):
      # Get a frame from the video source
      ret, frame = self.vid.get_frame()
      if ret:
@@ -53,8 +63,8 @@ class App:
 
      if ret:
          self.photo = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
-         self.photo2 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(movement))
          self.canvas.create_image(0, 0, image = self.photo, anchor = tkinter.NW)
+         self.photo2 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(movement))
          self.canvas2.create_image(0, 0, image = self.photo2, anchor = tkinter.NW)
 
      self.window.after(self.delay, self.update)
@@ -89,7 +99,7 @@ class MyVideoCapture:
          if ret:
              # Return a boolean success flag and the current frame converted to BGR
              colored = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
-             resized = small = cv2.resize(colored,
+             resized = cv2.resize(colored,
                                  dsize=(int(self.width*ratio),int(self.height*ratio)),
                                  interpolation=cv2.INTER_CUBIC)
              return (ret, resized)

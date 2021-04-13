@@ -1,6 +1,7 @@
 import cv2
 import os
 import time
+import sys
 '''
 Ce programme va nous permettre de fabriquer des images
 Pour démarrer l'enregistrement, appuyer sur "r"
@@ -11,16 +12,19 @@ Si on démarre le programme sans enregistrer de vidéo, on va créer un fichier 
 '''
 
 
-label = "Faire coucou" #LE PLUS IMPORTANT
+
+print("PROGRAMME OBSELETE, IL FAUT UTILISER 'DATA_FABRICATION_OBJECT.PY' MAINTENANT")
+sys.exit() #Arrête le programme
+
+label = "tests" #LE PLUS IMPORTANT
 
 duree_s = 2 #Durée de la vidéo quand on enregistre avec k
 video_name = "" #Si c'est vide, le numéro est incrémenté à chaque fois: "video_X.avi"
-folder = "DATA\\Videos"
+folder = "Videos"
 framerate = 25
 #Framerate du rendu final. Cela ne définit pas le nombre d'images qu'on lui donne.
 #Si on a un framerate de 20 et la vidéo de 10. ça veut dire qu'une seconde d'enregistrement
 # donne 20 images et donc 2 secondes de vidéo
-
 
 #-------------------------------------------------------------------------------
 '''Fonctions '''
@@ -50,7 +54,7 @@ def write_label(label,file_name):
     #Génère les labels la toute première fois
     # labels = open("DATA\\labels.csv", "w")
     # labels.write("label, file_name")
-    labels = open("DATA\\labels.csv","a")
+    labels = open("labels.csv","a")
     labels.write("\n" + label + "," + file_name) #Ajoute une nouvelle info sur une nouvelle ligne
     labels.close()
     #Parfois le texte s'écrit que la même ligne alors j'ai mis \n pour être sur
@@ -72,7 +76,7 @@ if __name__ == "__main__":
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
 
     #Compte le nombre de fichier
-    files = os.listdir("DATA\\Videos")
+    files = os.listdir("Videos")
     file_count = len(files)
 
     #Fabrication du nom de la vidéo
@@ -142,7 +146,6 @@ if __name__ == "__main__":
                 soon_saving = False
                 saving = 2
                 start = time.time()
-
 
 
         #à partir d'ici, les modifications sur frame n'auront pas d'effet sur l'enregistrement
