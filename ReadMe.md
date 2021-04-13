@@ -31,3 +31,19 @@ Interaction avec HMI
 
 Travailler avec l'image, c'est plus simple pour nous sachant qu'on fabrique
 déjà notre Squelette.
+
+
+
+
+
+Maj 13/4
+Problèmes:
+- Prise de vidéo imprécise, le nombre d'images n'est pas fixe.
+->Modifier la vidéo pour avoir le bon nombre d'image ou alors modifier le programme.
+->Modifier programme pour  ne pas devoir le modifier à chaque fois
+- Le modele, est-il bon?
+- Comment capturer les données et les envoyer au modèle?
+->Prendre deux secondes toutes les deux secondes? Le problème est si le mouvement se fait entre deux secondes..
+->Enregistrer uniquement lorsqu'il y a du mouvement mais est-ce qu'on va vraiment détecter le mouvement?
+->Enregistrer s'il y a du mouvement dans une zone et enregistrer slmt cette zone. C'est un peu bourrin mais ça peut fonctionner
+- Il faut des vidéos. Absolument.
