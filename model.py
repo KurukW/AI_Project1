@@ -41,7 +41,59 @@ Fabrication/Design du modèle
 #Inspiration des plus grands
 #CNN?
 #LSTM(RNN)?
+sample_shape = (1,120,160,12)
+model = Sequential()
+model.add(Conv3D(32, stride=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
+model.add(Dense(256, activation='relu', kernel_initializer='he_uniform'))
+model.add(BatchNormalization(center=True, scale=True))
+model.add(Conv3D(32, stride=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
+model.add(Dense(256, activation='relu', kernel_initializer='he_uniform'))
+model.add(BatchNormalization(center=True, scale=True))
+model.add(MaxPooling3D(pool_size=(3, 3, 3)))
+model.add(Dropout(0.2))
 
+model.add(Conv3D(64, stride=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
+model.add(Dense(256, activation='relu', kernel_initializer='he_uniform'))
+model.add(BatchNormalization(center=True, scale=True))
+model.add(Conv3D(64, stride=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
+model.add(Dense(256, activation='relu', kernel_initializer='he_uniform'))
+model.add(BatchNormalization(center=True, scale=True))
+model.add(MaxPooling3D(pool_size=(3, 3, 3)))
+model.add(Dropout(0.2))
+
+model.add(Conv3D(64, stride=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
+model.add(Dense(256, activation='relu', kernel_initializer='he_uniform'))
+model.add(BatchNormalization(center=True, scale=True))
+model.add(Conv3D(64, stride=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
+model.add(Dense(256, activation='relu', kernel_initializer='he_uniform'))
+model.add(BatchNormalization(center=True, scale=True))
+model.add(MaxPooling3D(pool_size=(3, 3, 3)))
+model.add(Dropout(0.2))
+
+model.add(Conv3D(128, stride=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
+model.add(Dense(256, activation='relu', kernel_initializer='he_uniform'))
+model.add(BatchNormalization(center=True, scale=True))
+
+
+#LSTM
+model = Sequential()
+#model.add(Embedding(num_distinct_words, embedding_output_dims, input_length=max_sequence_length))
+model.add(LSTM(units = 128,activation="tanh", recurrent_activation="sigmoid",return_sequences = False))
+
+
+
+#softmax
+model.add(Dense(10, activation='softmax'))
+
+# Compile the model
+#model.compile(loss='categorical_crossentropy',optimizer=keras.optimizers.Adam(lr=0.001),metrics=['accuracy'])
+#model.summary()
+# Fit data to model
+history = model.fit(X_train, targets_train,
+            batch_size=128,
+            epochs=40,
+            verbose=1,
+            validation_split=0.3)
 
 '''
 Train du modèle
