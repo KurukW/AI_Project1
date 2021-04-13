@@ -22,3 +22,5 @@ article de référence ? :https://sci-hub.st/10.1109/ACCESS.2017.2778011
 article a l'origine du LSTM : https://sci-hub.st/https://doi.org/10.1162/neco.1997.9.8.1735
 explication du lstm : https://www.machinecurve.com/index.php/2020/12/29/a-gentle-introduction-to-long-short-term-memory-networks-lstm/
 https://www.machinecurve.com/index.php/2021/01/07/build-an-lstm-model-with-tensorflow-and-keras/
+
+ConvLSTM2D: https://medium.com/neuronio/an-introduction-to-convlstm-55c9025563a7
