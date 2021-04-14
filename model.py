@@ -10,7 +10,8 @@ afin de pouvoir visualier chaque étape plus facilement
 
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras import layers
+from tensorflow.keras import layers, Sequential
+from tensorflow.keras.layers import  Dense, Conv3D, BatchNormalization,MaxPooling3D, Dropout, LSTM
 import matplotlib.pyplot as plt
 import cv2
 import numpy as np
@@ -43,34 +44,34 @@ Fabrication/Design du modèle
 #LSTM(RNN)?
 sample_shape = (1,120,160,12)
 model = Sequential()
-model.add(Conv3D(32, stride=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
+model.add(Conv3D(32, strides =(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
 model.add(Dense(256, activation='relu', kernel_initializer='he_uniform'))
 model.add(BatchNormalization(center=True, scale=True))
-model.add(Conv3D(32, stride=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
-model.add(Dense(256, activation='relu', kernel_initializer='he_uniform'))
-model.add(BatchNormalization(center=True, scale=True))
-model.add(MaxPooling3D(pool_size=(3, 3, 3)))
-model.add(Dropout(0.2))
-
-model.add(Conv3D(64, stride=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
-model.add(Dense(256, activation='relu', kernel_initializer='he_uniform'))
-model.add(BatchNormalization(center=True, scale=True))
-model.add(Conv3D(64, stride=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
+model.add(Conv3D(32, strides=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
 model.add(Dense(256, activation='relu', kernel_initializer='he_uniform'))
 model.add(BatchNormalization(center=True, scale=True))
 model.add(MaxPooling3D(pool_size=(3, 3, 3)))
 model.add(Dropout(0.2))
 
-model.add(Conv3D(64, stride=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
+model.add(Conv3D(64, strides=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
 model.add(Dense(256, activation='relu', kernel_initializer='he_uniform'))
 model.add(BatchNormalization(center=True, scale=True))
-model.add(Conv3D(64, stride=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
+model.add(Conv3D(64, strides=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
 model.add(Dense(256, activation='relu', kernel_initializer='he_uniform'))
 model.add(BatchNormalization(center=True, scale=True))
 model.add(MaxPooling3D(pool_size=(3, 3, 3)))
 model.add(Dropout(0.2))
 
-model.add(Conv3D(128, stride=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
+model.add(Conv3D(64, strides=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
+model.add(Dense(256, activation='relu', kernel_initializer='he_uniform'))
+model.add(BatchNormalization(center=True, scale=True))
+model.add(Conv3D(64, strides=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
+model.add(Dense(256, activation='relu', kernel_initializer='he_uniform'))
+model.add(BatchNormalization(center=True, scale=True))
+model.add(MaxPooling3D(pool_size=(3, 3, 3)))
+model.add(Dropout(0.2))
+
+model.add(Conv3D(128, strides=(1,1,1), padding="same", kernel_size=(3, 3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=sample_shape,data_format='channels_first'))
 model.add(Dense(256, activation='relu', kernel_initializer='he_uniform'))
 model.add(BatchNormalization(center=True, scale=True))
 

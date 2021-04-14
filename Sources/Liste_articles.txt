@@ -25,5 +25,8 @@ https://www.machinecurve.com/index.php/2021/01/07/build-an-lstm-model-with-tenso
 
 ConvLSTM2D: https://medium.com/neuronio/an-introduction-to-convlstm-55c9025563a7
 
-
 Dataset mouvements de mains: http://video.minelab.tw/gesture/
+Preprocess / Generator : https://cs230.stanford.edu/blog/datapipeline/
+                       : https://www.youtube.com/watch?v=uIcqeP7MFH0&ab_channel=TensorFlow
+
+video TO tfrectord (for tf.data): https://github.com/ferreirafabio/video2tfrecord
