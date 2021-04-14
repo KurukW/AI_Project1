@@ -104,7 +104,7 @@ def write_on_image(img,text, color = (255,255,255),position = "bottom left"):
     #Ecrit en bas de l'image le nombre de contours qu'il y a dedans
     #Bout de code temporaire, c'est pour les tests
     font                   = cv2.FONT_HERSHEY_SIMPLEX
-    fontScale              = 1
+    fontScale              = 0.8
     fontColor              = color
     lineType               = 2
 
