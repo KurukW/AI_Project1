@@ -13,7 +13,7 @@ Si on démarre le programme sans enregistrer de vidéo, on va créer un fichier 
 
 
 
-print("PROGRAMME OBSELETE, IL FAUT UTILISER 'DATA_FABRICATION_OBJECT.PY' MAINTENANT")
+print("PROGRAMME OBSELETE, IL FAUT UTILISER 'DATA_FAB.PY' MAINTENANT")
 sys.exit() #Arrête le programme
 
 label = "tests" #LE PLUS IMPORTANT

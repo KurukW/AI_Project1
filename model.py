@@ -76,7 +76,7 @@ model.add(BatchNormalization(center=True, scale=True))
 
 
 #LSTM
-model = Sequential()
+#model = Sequential() #Mis au début
 #model.add(Embedding(num_distinct_words, embedding_output_dims, input_length=max_sequence_length))
 model.add(LSTM(units = 128,activation="tanh", recurrent_activation="sigmoid",return_sequences = False))
 
@@ -88,17 +88,18 @@ model.add(Dense(10, activation='softmax'))
 # Compile the model
 #model.compile(loss='categorical_crossentropy',optimizer=keras.optimizers.Adam(lr=0.001),metrics=['accuracy'])
 #model.summary()
-# Fit data to model
-history = model.fit(X_train, targets_train,
-            batch_size=128,
-            epochs=40,
-            verbose=1,
-            validation_split=0.3)
 
 '''
 Train du modèle
 '''
 #fit()
+# Fit data to model
+
+# history = model.fit(X_train, targets_train,
+#             batch_size=128,
+#             epochs=40,
+#             verbose=1,
+#             validation_split=0.3)
 
 
 '''
