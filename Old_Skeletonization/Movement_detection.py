@@ -120,10 +120,16 @@ def movement_detect(now,prev,threshold = 150,sol = 2):
         return result[1]
 
     #Sol 2 #Résultat plus propre et 10x plus rapide
+    if sol == 2:
+        diff = cv2.absdiff(now,prev)
+        _,result = cv2.threshold(diff,threshold,255,cv2.THRESH_BINARY)
+        output = cv2.cvtColor(result,cv2.COLOR_BGR2GRAY)
+        return output
+    #Sol 3 #Test en prenant en gris avant de comparer
     diff = cv2.absdiff(now,prev)
+    #output = cv2.cvtColor(diff,cv2.COLOR_BGR2GRAY)
     _,result = cv2.threshold(diff,threshold,255,cv2.THRESH_BINARY)
-    output = cv2.cvtColor(result,cv2.COLOR_BGR2GRAY)
-    return output
+    return result
 
 def colored_movement(frame,movement):
     return cv2.bitwise_and(frame,frame,mask = movement)
@@ -334,6 +340,8 @@ if __name__ == "__main__":
     ret, frame = cap.read()
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
+    gray_count = 0
+    rgb_count = 0
     while True:
         # Capture frame-by-frame
         prev_gray = gray #J'enregistre la dernière image
@@ -343,8 +351,15 @@ if __name__ == "__main__":
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # Detection de mouvement
+        start = time.time()
         movement = movement_detect(frame,prev,20)
-        colored = colored_movement(frame,movement)
+        middle = time.time()
+        movement_gray = movement_detect(gray,prev_gray,20,3)
+        end = time.time()
+
+        rgb_count += (middle-start)
+        gray_count += (end-middle)
+        #colored = colored_movement(frame,movement)
         #contours = get_contours(movement)
         #
         # contour = draw_contours(frame,contours) # Contour du mvt sur rgb
@@ -353,8 +368,9 @@ if __name__ == "__main__":
         # cv2.imshow('Rectangles',rect)
 
     ##Différence entre les deux fonctions d'analyse de Mouvement
-        cv2.imshow('colored',colored)
+        #cv2.imshow('colored',colored)
         cv2.imshow('Mouvement', movement)
+        cv2.imshow('Gray',movement_gray)
         #contours = get_contours(movement1)
         #print(contours[0])
 
@@ -379,3 +395,6 @@ if __name__ == "__main__":
     # When everything done, release the capture and destroy the windows
     cap.release()
     cv2.destroyAllWindows()
+
+    print(f"rgb prend {rgb_count} secondes")
+    print(f"gray prend {gray_count} secondes")
