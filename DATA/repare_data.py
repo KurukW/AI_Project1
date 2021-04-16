@@ -1,4 +1,8 @@
 '''
+Ce programme n'a servi qu'une seule fois pour réparer des mauvaises vidéos.
+Avec le nouveau programme de film. Ce n'est plus nécessaire
+
+
 Le but du programme est d'ajouter ou supprimer des images aux vidéos qui n'en ont pas le bon nombre
 On veut 61 images, certaines en ont 59, 58, 60 ou 62
 '''
