@@ -1,1 +1,4 @@
-model_name, loss, accuracy
+model_name, loss, accuracy, comment
+
+Saved_model\model_LSTM_2_30_40_10_2_50_50_10mili,2.53898406,0.13333334
+Saved_model\model_LSTM_8_30_40_10_1_20_50_10mili,0,0,'Cassé [nan]'
