@@ -21,6 +21,6 @@ Problèmes:
 
 
 Maj 16/04:
-- Interface graphique
-- Prediction en live
-- Amelioration tu modèle
+- Interface graphique -> Done pour le principal
+- Prediction en live -> Done
+- Amelioration du modèle -> Aled

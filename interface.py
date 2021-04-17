@@ -5,7 +5,6 @@ https://solarianprogrammer.com/2018/04/21/python-opencv-show-video-tkinter-windo
 
 Intègre une vidéo opencv dans tkinter
 
-
 '''
 import tkinter
 import cv2
