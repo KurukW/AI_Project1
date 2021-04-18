@@ -16,16 +16,13 @@ Parametres
 heightf, widthf = 640, 1080
 
 
-#Choix du modele, attention que le modele doit exister
-fps = 8
-size = (40,30) #Sens inverse au nom du modèle
+#Paramètres
+fps = 10
+size = (100,75) #Sens inverse au nom du modèle
 nb_classes = 10
-epochs = 20
-batch_size = 50
-pack_size = 50
-learning_rate = 0.01
-
-
+folder_name = 'Saved_model\\'
+model_name = 'model_very_good_convLSTM2D_10_75_100_10_2_10_50_1mili.h5'
+full_path = folder_name + model_name
 #Broken: [nan]
 # fps = 8
 # size = (40,30) #Sens inverse au nom du modèle
@@ -251,10 +248,6 @@ Main
 '''
 #Import du modèle
 
-param = f"_{fps}_{size[1]}_{size[0]}_{nb_classes}_{epochs}_{batch_size}_{pack_size}_{int(learning_rate*1000)}mili"
-type = 'model_LSTM'
-folder = 'Saved_model'
-full_path = folder + '\\' + type + param
 try:
     model = keras.models.load_model(full_path)
     #keras.models.load_model('Saved_model\\modele_stolen_compile')
