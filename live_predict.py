@@ -1,12 +1,5 @@
 '''
 Prediction en live de mouvements
-
-
-
-A FAIRE:
-Ajouter la prédiction et le mettre en thread au besoin
-
-
 '''
 
 import cv2
@@ -78,15 +71,14 @@ def show_prediction():
 #-------------------------------------------------------------------------------
 '''
 Main
-
 '''
 
 #Choix du modele, attention que le modele doit exister
 fps = 8
 size = (40,30) #Sens inverse au nom du modèle
 nb_classes = 10
-epochs = 1
-batch_size = 20
+epochs = 20
+batch_size = 50
 pack_size = 50
 learning_rate = 0.01
 
@@ -105,8 +97,8 @@ try:
     #keras.models.load_model('Saved_model\\modele_stolen_compile')
     print("modele importé avec succès")
 except:
-    print('''Erreur lors du chargement du modele,
-    vérifiez que les paramètres sont bons et que le modele existe''')
+    print("Erreur lors du chargement du modele",
+    "vérifiez que les paramètres sont bons et que le modele existe")
     print("Je voulais importer le modele:",full_path)
     sys.exit()
 
@@ -164,7 +156,7 @@ while True:
     prev = frame
     ret, frame = cap.read()
     start = time.time()
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
 
     #Récupère seulement certaines images
@@ -205,9 +197,6 @@ while True:
 
         #pred = model.predict(X)
         end_pred = time.time()
-
-
-
 
 
 
