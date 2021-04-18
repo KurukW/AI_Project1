@@ -10,7 +10,7 @@ Ce programme va nous permettre de fabriquer des images
 
 label = "tests" #LE PLUS IMPORTANT
 
-duree_s = 2 #Durée de la vidéo quand on enregistre avec k
+duree_s = 1 #Durée du timer avant enregistrement
 video_name = "" #Si c'est vide, le numéro est incrémenté à chaque fois: "video_X.avi"
 folder = "Videos"
 framerate = 25
@@ -168,7 +168,7 @@ if __name__ == "__main__":
         #Timer avant enregistrement
         if soon_saving:
             now = time.time()
-            time_left = 2 - (now - start_soon)
+            time_left = duree_s - (now - start_soon)
             time_left_f = "{:.2f}".format(time_left)
             s = time_left_f
             if time_left <= 0:

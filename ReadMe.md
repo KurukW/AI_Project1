@@ -24,3 +24,9 @@ Maj 16/04:
 - Interface graphique -> Done pour le principal
 - Prediction en live -> Done
 - Amelioration du modèle -> Aled
+
+Maj 18/4:
+- Solution pour le modele
+-> Prendre un modele pre entrainé
+-> Faire plus de vidéos : 80 Vidéos de chaque mouvement
+-> Vérifier que le generateur donne des vidéos dans un ordre aléatoire: Check
