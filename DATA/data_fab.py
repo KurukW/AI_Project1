@@ -2,22 +2,30 @@ import cv2
 import os
 import time
 import pandas as pd
+from count_data import count #J'importe ce programme afin de voir cb j'ai de chaque au début
 
 '''
 Ce programme va nous permettre de fabriquer des images
 '''
 
 
-label = "tests" #LE PLUS IMPORTANT
 
 duree_s = 1 #Durée du timer avant enregistrement
 video_name = "" #Si c'est vide, le numéro est incrémenté à chaque fois: "video_X.avi"
-folder = "Videos"
+dossier = 'Train' #ou Train
 framerate = 25
 #Framerate du rendu final. Cela ne définit pas le nombre d'images qu'on lui donne.
 #Si on a un framerate de 20 et la vidéo de 10. ça veut dire qu'une seconde d'enregistrement
 # donne 20 images et donc 2 secondes de vidéo
 
+
+
+if dossier == 'Train':
+    folder = "Videos"
+    csv = "labels.csv"
+elif dossier == 'Test':
+    folder = "V_tests"
+    csv = "labels_tests.csv"
 
 #---------------------------------------------------------------------
 '''
@@ -52,12 +60,12 @@ class Video_saving:
 
     def create_name(self,folder,video_name,label):
         #Compte le nombre de fichier (ancienne méthode)
-        files = os.listdir("Videos")
-        file_count = len(files)
+        # files = os.listdir("Videos")
+        # file_count = len(files)
 
 
         #Num = last+1 (nouvelle méthode)
-        labels = pd.read_csv("labels.csv")
+        labels = pd.read_csv(csv)
         next_index = max([int(file_name[6:-4]) for _, file_name in labels.values]) + 1 #Ne pas oublier le +1
         #Récupère l'index maximum actuel dans le fichier labels.csv
 
@@ -119,7 +127,7 @@ def write_label(label,file_name):
     #Génère les labels la toute première fois
     # labels = open("DATA\\labels.csv", "w")
     # labels.write("label, file_name")
-    labels = open("labels.csv","a")
+    labels = open(csv,"a")
     labels.write("\n" + label + "," + file_name) #Ajoute une nouvelle info sur une nouvelle ligne
     labels.close()
     #Parfois le texte s'écrit que la même ligne alors j'ai mis \n pour être sur
@@ -128,6 +136,11 @@ def write_label(label,file_name):
 '''MAIN CODE '''
 if __name__ == "__main__":
     global video_to_saved
+
+    #Affiche le nombre de video que j'ai de chaque type
+    count(csv)
+
+
     # Connects to your computer's default camera
     cap = cv2.VideoCapture(0)
 

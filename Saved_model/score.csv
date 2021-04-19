@@ -6,3 +6,6 @@ Saved_model\model_LSTM_8_30_40_10_1_20_50_10mili,0,0,'Cassé [nan]'
 Saved_model\model_convLSTM2D_10_30_40_10_10_100_100_1mili,4.92132092,0.06666667
 Saved_model\model_good_convLSTM2D_10_75_100_10_2_10_50_1mili,1.64705408,0.46666667
 Saved_model\model_very_good_convLSTM2D_10_75_100_10_2_10_50_1mili,1.79268169,0.446153849
+
+Saved_model\model_convLSTM2D_1_5_75_100_10_2_10_50_10mili,2.04945612,0.26153848
+Saved_model\model_convLSTM2D_1_5_90_120_10_2_10_50_10mili,2.21008158,0.12307692
