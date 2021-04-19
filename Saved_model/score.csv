@@ -9,3 +9,5 @@ Saved_model\model_very_good_convLSTM2D_10_75_100_10_2_10_50_1mili,1.79268169,0.4
 
 Saved_model\model_convLSTM2D_1_5_75_100_10_2_10_50_10mili,2.04945612,0.26153848
 Saved_model\model_convLSTM2D_1_5_90_120_10_2_10_50_10mili,2.21008158,0.12307692
+
+Saved_model\model_almost_perfect_convLSTM2D_1_10_75_100_10_2_20_100_1mili,0.57661033,0.79230767
