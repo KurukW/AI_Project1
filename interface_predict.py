@@ -22,8 +22,13 @@ fps = 10
 size = (100,75) #Sens inverse au nom du modèle
 nb_classes = 10
 folder_name = 'Saved_model\\'
+<<<<<<< HEAD
 model_name = 'model_convLSTM2D_8_10_75_100_10_2_50_50_1mili.h5'
+=======
+model_name = 'model_almost_perfect_convLSTM2D_1_10_75_100_10_2_20_100_1mili.h5'
+>>>>>>> c6998c85d51245746f0640a13e9f88861ed4b60e
 full_path = folder_name + model_name
+#'old_goods\\model_good_convLSTM2D_10_75_100_10_2_10_50_1mili.h5'
 #Broken: [nan]
 # fps = 8
 # size = (40,30) #Sens inverse au nom du modèle
@@ -49,6 +54,10 @@ def scale_by_pixels(img, x_min, x_max):
     qui faisaient lignes par lignes ce qui causait des erreurs
     dans le résultat (lignes dans l'image)
     '''
+
+    start_norm = time.time()
+    #Il faut vérifier sur exemple que normalize est bon
+    # new_img = cv2.normalize(img,x_min,x_max, cv2.NORM_MINMAX)
     new_img = img.copy()
     p_min = 1000
     p_max = -1000
@@ -64,6 +73,8 @@ def scale_by_pixels(img, x_min, x_max):
             denom = (p_max - p_min)
             if denom == 0: denom = 1
             new_img[l][p] = x_min + nom/denom
+    end_norm = time.time()
+    #print(f"la normalisation prend {end_norm - start_norm} secondes")
     return new_img
 
 
@@ -76,10 +87,19 @@ def predict(model):
     Prédit un résultat de la queue et le remet dans la queue
     '''
     while True:
+<<<<<<< HEAD
         with tf.device('cpu:0'):
             X = q_to_pred.get()
             pred = model.predict(X)
             q_pred.put(pred)
+=======
+        X = q_to_pred.get()
+        start_pred = time.time()
+        pred = model.predict(X)
+        end_pred = time.time()
+        print(f"Une prédiction prend {end_pred - start_pred} secondes")
+        q_pred.put(pred)
+>>>>>>> c6998c85d51245746f0640a13e9f88861ed4b60e
 
 
 
@@ -120,7 +140,6 @@ class App:
         # for i,labels in enumerate(label.values):
         #     self.text1 = tkinter.Label(window, text=labels[0]).place(x=2*widthf/3, y=(30*i)+100)
         #
-
         self.movs = []
         self.stop_showing = False
 
@@ -167,6 +186,7 @@ class App:
 
     def update_mov(self):
         ret, prev = self.vid.get_frame()
+        time.sleep(0.01) #Methode de bourrin, il faudrait autre chose
         ret, frame = self.vid.get_frame()
         gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
         prev_gray = cv2.cvtColor(prev,cv2.COLOR_BGR2GRAY)
@@ -201,15 +221,15 @@ class App:
         '''
         while True:
             pred = q_pred.get()
-            # sortable_pred = []
-            #Classement dans l'ordre des prédictions
-            # for i,elt in enumerate(pred):
-            #     sortable_pred.append((elt,i)) #Je met la valeur en premier pour trier plus facilement
+                # sortable_pred = []
+                #Classement dans l'ordre des prédictions
+                # for i,elt in enumerate(pred):
+                #     sortable_pred.append((elt,i)) #Je met la valeur en premier pour trier plus facilement
             # En une ligne:
-
             sortable_pred = [(elt,i) for i,elt in enumerate(pred[0])]
             sortable_pred.sort(reverse = True)
-            #Affichage des résultats
+            #Affichage des résultat
+            print("La première valeur est ", sortable_pred[0])
             for i,(val, index) in enumerate(sortable_pred):
                 #pourcent = f"{val:4.3f}"
                 nom = labels_n[index]
