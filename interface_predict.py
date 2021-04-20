@@ -42,37 +42,6 @@ full_path = folder_name + model_name
 Fonctions
 '''
 
-def scale_by_pixels(img, x_min, x_max):
-    '''
-    Scale une image entre 0 et 1.
-    Méthode pas efficace mais fonctionnelle contrairement à d'autres méthodes
-    qui faisaient lignes par lignes ce qui causait des erreurs
-    dans le résultat (lignes dans l'image)
-    '''
-
-    start_norm = time.time()
-    #Il faut vérifier sur exemple que normalize est bon
-    # new_img = cv2.normalize(img,x_min,x_max, cv2.NORM_MINMAX)
-    new_img = img.copy()
-    p_min = 1000
-    p_max = -1000
-    for line in img:
-        for pixel in line:
-            p_min = min(p_min,pixel)
-            p_max = max(p_max,pixel)
-
-    #p_min et p_max sont les min et max totaux de mon image
-    for l, line in enumerate(img):
-        for p,pixel in enumerate(line):
-            nom = (pixel - p_min)*(x_max - x_min)
-            denom = (p_max - p_min)
-            if denom == 0: denom = 1
-            new_img[l][p] = x_min + nom/denom
-    end_norm = time.time()
-    #print(f"la normalisation prend {end_norm - start_norm} secondes")
-    return new_img
-
-
 
 '''
 Thread
@@ -181,9 +150,9 @@ class App:
         #Détection de mouvement
         diff = cv2.absdiff(gray,prev_gray)
         #Réduire la taille
-        resized = cv2.resize(diff, dsize=size, interpolation=cv2.INTER_CUBIC)
+        resized = cv2.resize(diff, dsize=size, interpolation=cv2.INTER_LINEAR)
         #Normaliser
-        normalized = scale_by_pixels(resized,0,1)
+        normalized = cv2.normalize(resized,0,1,cv2.NORM_MINMAX)
         self.movs.append(normalized)
 
 

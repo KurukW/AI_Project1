@@ -12,7 +12,7 @@ Ce programme va nous permettre de fabriquer des images
 
 duree_s = 1 #Durée du timer avant enregistrement
 video_name = "" #Si c'est vide, le numéro est incrémenté à chaque fois: "video_X.avi"
-dossier = 'Train' #ou Train
+dossier = 'Test' #ou Train
 framerate = 25
 #Framerate du rendu final. Cela ne définit pas le nombre d'images qu'on lui donne.
 #Si on a un framerate de 20 et la vidéo de 10. ça veut dire qu'une seconde d'enregistrement
