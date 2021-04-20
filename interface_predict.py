@@ -9,6 +9,7 @@ import numpy as np
 import threading
 from queue import Queue
 from tensorflow import keras
+import tensorflow as tf
 
 '''
 Parametres
@@ -21,7 +22,7 @@ fps = 10
 size = (100,75) #Sens inverse au nom du modèle
 nb_classes = 10
 folder_name = 'Saved_model\\'
-model_name = 'model_very_good_convLSTM2D_10_75_100_10_2_10_50_1mili.h5'
+model_name = 'model_convLSTM2D_8_10_75_100_10_2_50_50_1mili.h5'
 full_path = folder_name + model_name
 #Broken: [nan]
 # fps = 8
@@ -75,9 +76,10 @@ def predict(model):
     Prédit un résultat de la queue et le remet dans la queue
     '''
     while True:
-        X = q_to_pred.get()
-        pred = model.predict(X)
-        q_pred.put(pred)
+        with tf.device('cpu:0'):
+            X = q_to_pred.get()
+            pred = model.predict(X)
+            q_pred.put(pred)
 
 
 
