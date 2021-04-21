@@ -1,4 +1,5 @@
 '''
+OLD, des maj importantes ont été faites depuis ce programme
 Prediction en live de mouvements
 '''
 
