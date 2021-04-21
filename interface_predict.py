@@ -21,6 +21,7 @@ heightf, widthf = 640, 1080
 fps = 10
 size = (100,75) #Sens inverse au nom du modèle
 nb_classes = 10
+valeur_slider = 0
 #model_name = 'model_convLSTM2D_8_10_75_100_10_2_50_50_1mili.h5'
 path = 'Modele_acc77_bon.h5'
 
@@ -88,6 +89,9 @@ class App:
         #self.text1 = tkinter.Label(window, text="inserer ici ce que le modèle a reconnu").place(x=2*widthf/3-35, y=heightf-100)
         #self.btn_snapshot.pack(anchor=tkinter.CENTER, expand=True)
         self.btn_stop_pred = tkinter.Button(window, text="Freeze", command=self.stop_pred).place(x=2*widthf/3, y = 80)
+
+
+
         #Pas besoin de pack parce qu'on le place direct
         # #liste de tous les gestes sur la droite de l'écran
         #
@@ -155,7 +159,7 @@ class App:
         if res_max != 0:
             normalized = resized/float(resized.max())
         else:
-            normalized = resized.copy() #ça ne change rien parce qu'il 
+            normalized = resized.copy() #ça ne change rien parce qu'il
         #normalized = cv2.normalize(resized,0,1,cv2.NORM_MINMAX)
         self.movs.append(normalized)
 
@@ -173,14 +177,26 @@ class App:
             #Predict de X
             q_to_pred.put(X)
 
-        self.window.after(self.delay_fps,self.update_mov)
 
+
+
+
+
+        # afficher le nombre de frames
+        self.text1 = tkinter.Label(self.window, text=str(len(self.movs))+" frames already captured      ").place(x=2*widthf/3, y=330)
+        self.window.after(self.delay_fps,self.update_mov)
 
     def get_prediction(self):
         '''
         Affiche un résultat
         '''
         while True:
+
+
+
+
+
+
             pred = q_pred.get()
                 # sortable_pred = []
                 #Classement dans l'ordre des prédictions
@@ -191,12 +207,21 @@ class App:
             sortable_pred.sort(reverse = True)
             #Affichage des résultat
             print("La première valeur est ", sortable_pred[0])
-            for i,(val, index) in enumerate(sortable_pred):
-                #pourcent = f"{val:4.3f}"
-                nom = labels_n[index]
-                texte = str(val) +"  :  " + nom + " "*70
-                if not self.stop_showing:
-                    self.text1 = tkinter.Label(self.window, text=texte).place(x=2*widthf/3, y=(30*i)+100)
+            if sortable_pred[0] >=(valeur_slider/100,):
+                for i,(val, index) in enumerate(sortable_pred):
+                    #pourcent = f"{val:4.3f}"
+                    nom = labels_n[index]
+                    texte = str(val) +"  :  " + nom + " "*70
+                    if not self.stop_showing:
+                        self.text1 = tkinter.Label(self.window, text=texte).place(x=2*widthf/3, y=(30*i)+100)
+                    if i ==2:
+                        break
+            else:
+                self.text1 = tkinter.Label(self.window, text="                                                                                                           ").place(x=2*widthf/3, y=100)
+                self.text1 = tkinter.Label(self.window, text="The prediction is not high enought                                                                         ").place(x=2*widthf/3, y=130)
+                self.text1 = tkinter.Label(self.window, text="                                                                                                           ").place(x=2*widthf/3, y=160)
+
+
 
 
 class MyVideoCapture:
@@ -265,6 +290,9 @@ t_pred.start()
 n_frames = int(fps*2.4)
 
 
-
  # Create a window and pass it to the Application object
 App(tkinter.Tk(), "Tkinter and OpenCV")
+
+# valeur_slider = slider.get()
+# slider = tkinter.Scale(self.window, from_=0, to=100, tickinterval = 20,orient="horizontal",label = "Thershold value",length = 300)
+# slider.place(x=300,y=550)
