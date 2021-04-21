@@ -22,11 +22,9 @@ fps = 10
 size = (100,75) #Sens inverse au nom du modèle
 nb_classes = 10
 folder_name = 'Saved_model\\'
-<<<<<<< HEAD
-model_name = 'model_convLSTM2D_8_10_75_100_10_2_50_50_1mili.h5'
-=======
-model_name = 'model_almost_perfect_convLSTM2D_1_10_75_100_10_2_20_100_1mili.h5'
->>>>>>> c6998c85d51245746f0640a13e9f88861ed4b60e
+
+model_name = 'Modele_acc77_bon.h5'
+
 full_path = folder_name + model_name
 #'old_goods\\model_good_convLSTM2D_10_75_100_10_2_10_50_1mili.h5'
 #Broken: [nan]
@@ -56,19 +54,19 @@ def predict(model):
     Prédit un résultat de la queue et le remet dans la queue
     '''
     while True:
-<<<<<<< HEAD
+
         with tf.device('cpu:0'):
             X = q_to_pred.get()
             pred = model.predict(X)
             q_pred.put(pred)
-=======
-        X = q_to_pred.get()
-        start_pred = time.time()
-        pred = model.predict(X)
-        end_pred = time.time()
-        print(f"Une prédiction prend {end_pred - start_pred} secondes")
-        q_pred.put(pred)
->>>>>>> c6998c85d51245746f0640a13e9f88861ed4b60e
+
+        # X = q_to_pred.get()
+        # start_pred = time.time()
+        # pred = model.predict(X)
+        # end_pred = time.time()
+        # print(f"Une prédiction prend {end_pred - start_pred} secondes")
+        # q_pred.put(pred)
+
 
 
 
@@ -126,6 +124,29 @@ class App:
         self.update_mov()
 
         self.window.mainloop()
+    def scale_by_pixels(self,img, x_min, x_max):
+        '''
+        Scale une image entre 0 et 1.
+        Méthode pas efficace mais fonctionnelle contrairement à d'autres méthodes
+        qui faisaient lignes par lignes ce qui causait des erreurs
+        dans le résultat (lignes dans l'image)
+        '''
+        new_img = img.copy()
+        p_min = 1000
+        p_max = -1000
+        for line in new_img:
+            for pixel in line:
+                p_min = min(p_min,pixel)
+                p_max = max(p_max,pixel)
+
+                #p_min et p_max sont les min et max totaux de mon image
+        for l, line in enumerate(img):
+            for p,pixel in enumerate(line):
+                nom = (pixel - p_min)*(x_max - x_min)
+                denom = (p_max - p_min)
+                if denom == 0: denom = 1
+                new_img[l][p] = x_min + nom/denom
+        return new_img
 
     def snapshot(self):
          # Get a frame from the video source
@@ -152,6 +173,16 @@ class App:
              self.canvas.create_image(0, 0, image = self.photo, anchor = tkinter.NW)
 
          self.window.after(self.delay, self.update)
+    def normalize_imgs(self,imgs):
+        '''
+        Normalise une série d'images
+        '''
+        norm_imgs = []
+        for img in imgs:
+            norm_img = self.scale_by_pixels(img,0,1)
+            norm_imgs.append(norm_img)
+#           print(f"Après normalisation, max = {np.max(norm_imgs)} et min = {np.min(norm_imgs)}")
+        return norm_imgs
 
     def update_mov(self):
         ret, prev = self.vid.get_frame()
@@ -164,7 +195,7 @@ class App:
         #Réduire la taille
         resized = cv2.resize(diff, dsize=size, interpolation=cv2.INTER_LINEAR)
         #Normaliser
-        normalized = cv2.normalize(resized,0,1,cv2.NORM_MINMAX)
+        normalized = self.normalize_imgs(resized)
         self.movs.append(normalized)
 
 
