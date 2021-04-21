@@ -21,8 +21,8 @@ heightf, widthf = 640, 1080
 fps = 10
 size = (100,75) #Sens inverse au nom du modèle
 nb_classes = 10
-folder_name = 'Saved_model\\'
-model_name = 'model_convLSTM2D_8_10_75_100_10_2_50_50_1mili.h5'
+#model_name = 'model_convLSTM2D_8_10_75_100_10_2_50_50_1mili.h5'
+path = 'Modele_acc77_bon.h5'
 
 #'old_goods\\model_good_convLSTM2D_10_75_100_10_2_10_50_1mili.h5'
 #Broken: [nan]
@@ -52,7 +52,7 @@ def predict(model):
     Prédit un résultat de la queue et le remet dans la queue
     '''
     while True:
-        with tf.device('cpu:0')
+        #with tf.device('cpu:0'):
         X = q_to_pred.get()
         start_pred = time.time()
         pred = model.predict(X)
@@ -151,7 +151,12 @@ class App:
         #Réduire la taille
         resized = cv2.resize(diff, dsize=size, interpolation=cv2.INTER_LINEAR)
         #Normaliser
-        normalized = cv2.normalize(resized,0,1,cv2.NORM_MINMAX)
+        res_max = resized.max()
+        if res_max != 0:
+            normalized = resized/float(resized.max())
+        else:
+            normalized = resized.copy() #ça ne change rien parce qu'il 
+        #normalized = cv2.normalize(resized,0,1,cv2.NORM_MINMAX)
         self.movs.append(normalized)
 
 
@@ -227,13 +232,13 @@ Main
 #Import du modèle
 
 try:
-    model = keras.models.load_model(full_path)
+    model = keras.models.load_model(path)
     #keras.models.load_model('Saved_model\\modele_stolen_compile')
     print("modele importé avec succès")
 except:
     print("Erreur lors du chargement du modele",
     "vérifiez que les paramètres sont bons et que le modele existe")
-    print("Je tentais d'importer le modele:",full_path)
+    print("Je tentais d'importer le modele:",path)
     sys.exit()
 
 
