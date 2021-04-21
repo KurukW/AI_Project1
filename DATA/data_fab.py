@@ -9,7 +9,6 @@ Ce programme va nous permettre de fabriquer des images
 '''
 
 
-
 duree_s = 1 #Durée du timer avant enregistrement
 video_name = "" #Si c'est vide, le numéro est incrémenté à chaque fois: "video_X.avi"
 dossier = 'Test' #ou Train
