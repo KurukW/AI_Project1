@@ -159,7 +159,6 @@ class App:
         if res_max != 0:
             normalized = resized/float(resized.max())
         else:
-            normalized = resized.copy() #ça ne change rien parce qu'il
         #normalized = cv2.normalize(resized,0,1,cv2.NORM_MINMAX)
         self.movs.append(normalized)
 
