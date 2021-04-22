@@ -2,26 +2,17 @@ L'interface:
 
 
 William :
-- Gérer le changement de page (Quand on ajoute un mouvement,
- on doit arrêter de filmer et de prédire parce que ça utilise toute la cpu)
-
 - Ajouter un mouvement
   + Film d'une vidéo
   + Ajout dans une liste de labels du nouveau label (ou rien changer si le label existe)
   + Ajout de plus de vidéos
--> William s'en occupera
+-> A déplacer de "interface_test" à "interface_predict"
 
 
-- Liste des mouvements actuels
-  (+ Visualisation des mouvements actuels)
--> Nicolas s'en occupera
+- MISE EN PAGE
+(- Lors de la prédiction, ne pas supprimer les prédictions précédentes
+si notre prédiction n'a rien donné)
 
 
-Nico:
-- Meilleur Visualisation du moment où on enregistre / Tester plus souvent
--> Check
 
-- Seuil lors de la prédiction (ex: si c'est inférieur à 0.5 on ne prend pas)
-- Afficher uniquement les meilleurs choix
--> Check
 (- Si motivation: un curseur pour gérer le seuil)

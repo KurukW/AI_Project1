@@ -126,9 +126,6 @@ class App:
         self.update_mov()
 
 
-        # mettre condition de l'ouverture de la new_window
-        self.delay = 15
-        self.update_new_window()
 
 
 
@@ -153,33 +150,34 @@ class App:
 
 
          self.window.after(self.delay, self.update)
-
-    def update_new_window(self):
-         # Get a frame from the video source
-        new_window_set = 0
-        if new_window_set == 1:
-
-            for i in len(self.imgs) :
-             #Affichage de l'image
-                self.photo_vid = PIL.ImageTk.PhotoImage(image = self.imgs[i])
-                self.canvas.create_image(0, 0, image = self.photo_vid, anchor = tkinter.NW)
-
-        self.window.after(self.delay, self.update)
+    #
+    # def update_new_window(self):
+    #      # Get a frame from the video source
+    #     new_window_set = 0
+    #     if new_window_set == 1:
+    #
+    #         for i in len(self.imgs) :
+    #          #Affichage de l'image
+    #             self.photo_vid = PIL.ImageTk.PhotoImage(image = self.imgs[i])
+    #             self.canvas.create_image(0, 0, image = self.photo_vid, anchor = tkinter.NW)
+    #
+    #     self.window.after(self.delay, self.update)
 
 
     def create_example_videos(self, fps = -1):
         '''
-        Créer la liste d'images
+        Créer la liste d'images qui vont défiler en boucle dans la deuxième fenêtre
         '''
         if not self.example_vid == None:
             return
 
         self.example_vid = []
 
-        csv_ref = pd.read_csv("DATA\\")
-
+        csv_ref = pd.read_csv("DATA\\labels_example.csv")
+        img = None
         for label, video_name in csv_ref.values:
-            cap = cv2.VideoCapture("DATA\\Video_example" + video_name)
+            cap = cv2.VideoCapture("DATA\\Video_example\\" + video_name)
+            #print("la video est ", video_name) #DEBUG
             try:
                 fps_actu = cap.get(cv2.CAP_PROP_FPS)
                 if fps <= -1: fps = fps_actu #Je peux ne pas donner de fps et ça va prendre le nombre d'fps initial
@@ -187,9 +185,7 @@ class App:
                 ecart_initial = int(1000/fps_actu)
                 imgs = []
 
-                ret, frame = cap.read()
                 while(cap.isOpened()):
-                    prev = frame
                     ret, frame = cap.read()
 
                     if ret: #Sinon ça plante quand il n'y a plus d'images
@@ -198,18 +194,18 @@ class App:
                         modulo = t_ms % ecart_voulu
                         if modulo < ecart_initial:
                             #Isoler les images
-
-                            imgs.append(diff_gray)
-
+                            colored =  cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                            resized = cv2.resize(colored, dsize=(320,240), interpolation=cv2.INTER_LINEAR)
+                            imgs.append(resized)
                     else: #Va jusqu'au bout de la vidéo
                         break
                 else:
                     print("Le fichier n'a pas pu être ouvert")
             except:
-                print(f"IL Y A UN PROBLEME AVEC LA VIDEO: {path}")
+                print(f"IL Y A UN PROBLEME AVEC LA VIDEO: {video_name}")
             cap.release()
             self.example_vid.append(imgs)
-
+        #print("J'ai réussi à importer toutes les vidéos") #DEBUG
 
     def open_window(self):
         self.freeze()
@@ -222,22 +218,42 @@ class App:
 
 
         #Liste des vidéos
-        canvas =tkinter.Canvas(new_window,width =300,height = 300)
-        canvas.pack()
-        create_example_videos(20) # 20 fps
-
+        self.canvas_ex = tkinter.Canvas(new_window,width =320,height = 240)
+        self.canvas_ex.pack()
+        self.create_example_videos(20) # 20 fps
 
 
         def show_videos():
-            pass
+            if self.example_vid == None:
+                print("Pas de videos")
+                return
+            vid_len = len(self.example_vid[0])
+            tot_len = vid_len * len(self.example_vid)
+            if self.count_img_example >= tot_len:
+                self.count_img_example = 0
+
+
+
+            img = self.example_vid[int(self.count_img_example / vid_len)][int(self.count_img_example % vid_len)]
+            #img = self.example_vid[0][5]
+            self.photo_vid = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(img))
+            self.canvas_ex.create_image(0, 0, image = self.photo_vid, anchor = tkinter.NW)
+
+            self.count_img_example += 1
+            new_window.after(50, show_videos)
+
+        self.count_img_example = 0
+        show_videos()
 
         # Ajouter un nouveau label
         def new_label():
             #Idéalement, il faudrait un peu de vérification du nom inséré
             #(retirer les virgules par exemple, mais ça n'est pas le but du projet)
+            csv = "DATA\\labels_uses.csv"
             lbl_name = entry_val.get()
-            labels_list = pd.read_csv(labels_uses.csv)
+            labels_list = pd.read_csv(csv)
             if lbl_name in labels_list:
+                #Il y a un problème, il ne passe pas ici et ajoute deux fois le nom
                 text_confirm_new_label = tkinter.Label(new_window, text = "Ce label existe déjà")
                 return
 

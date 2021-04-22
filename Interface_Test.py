@@ -48,7 +48,7 @@ class Fenetre_video:
         new_window.title("New Window")
         lbl = tk.Label(new_window, text="Je suis une nouvelle fenetre")
         lbl.pack()
-
+        
         def add_vid():
             save_video('DATA\\Videos', 'DATA\\labels.csv', 'DATA\\labels_uses.csv',25,2)
         btn_add_vid = tk.Button(new_window, text = "Nouvelles vidéos",
