@@ -15,15 +15,19 @@ import tensorflow as tf
 Parametres
 '''
 heightf, widthf = 640, 1080
+seuil = 0.4
+
 
 
 #Paramètres
 fps = 10
-size = (100,75) #Sens inverse au nom du modèle
+size = (120,90) #Sens inverse au nom du modèle
 nb_classes = 10
 valeur_slider = 0
 #model_name = 'model_convLSTM2D_8_10_75_100_10_2_50_50_1mili.h5'
-path = 'Modele_acc77_bon.h5'
+#path = 'Modele_acc77_bon.h5'
+path = 'Saved_model\\model_convLSTM2D_12_10_90_120_10_3_20_40_2mili.h5'
+
 
 #'old_goods\\model_good_convLSTM2D_10_75_100_10_2_10_50_1mili.h5'
 #Broken: [nan]
@@ -88,7 +92,8 @@ class App:
         #self.btn_snapshot2=tkinter.Button(window, text="Snapshot", command=self.snapshot).place(x=2*widthf/3-35, y=heightf-100,width=120,height = 30)
         #self.text1 = tkinter.Label(window, text="inserer ici ce que le modèle a reconnu").place(x=2*widthf/3-35, y=heightf-100)
         #self.btn_snapshot.pack(anchor=tkinter.CENTER, expand=True)
-        self.btn_stop_pred = tkinter.Button(window, text="Freeze", command=self.stop_pred).place(x=2*widthf/3, y = 80)
+        self.btn_stop_pred = tkinter.Button(window, text="Freeze",
+                command=self.stop_pred).place(x=2*widthf/3, y = 80)
 
 
 
@@ -159,6 +164,7 @@ class App:
         if res_max != 0:
             normalized = resized/float(resized.max())
         else:
+            normalized = resized
         #normalized = cv2.normalize(resized,0,1,cv2.NORM_MINMAX)
         self.movs.append(normalized)
 
@@ -191,11 +197,6 @@ class App:
         '''
         while True:
 
-
-
-
-
-
             pred = q_pred.get()
                 # sortable_pred = []
                 #Classement dans l'ordre des prédictions
@@ -206,19 +207,19 @@ class App:
             sortable_pred.sort(reverse = True)
             #Affichage des résultat
             print("La première valeur est ", sortable_pred[0])
-            if sortable_pred[0] >=(valeur_slider/100,):
-                for i,(val, index) in enumerate(sortable_pred):
-                    #pourcent = f"{val:4.3f}"
-                    nom = labels_n[index]
-                    texte = str(val) +"  :  " + nom + " "*70
-                    if not self.stop_showing:
+            if not self.stop_showing:
+                if sortable_pred[0] >=(seuil,):
+                    for i,(val, index) in enumerate(sortable_pred):
+                        #pourcent = f"{val:4.3f}"
+                        nom = labels_n[index]
+                        texte = str(val) +"  :  " + nom + " "*70
                         self.text1 = tkinter.Label(self.window, text=texte).place(x=2*widthf/3, y=(30*i)+100)
-                    if i ==2:
-                        break
-            else:
-                self.text1 = tkinter.Label(self.window, text="                                                                                                           ").place(x=2*widthf/3, y=100)
-                self.text1 = tkinter.Label(self.window, text="The prediction is not high enought                                                                         ").place(x=2*widthf/3, y=130)
-                self.text1 = tkinter.Label(self.window, text="                                                                                                           ").place(x=2*widthf/3, y=160)
+                        if i ==2:
+                            break
+                else:
+                    self.text1 = tkinter.Label(self.window, text=" "*107).place(x=2*widthf/3, y=100)
+                    self.text1 = tkinter.Label(self.window, text="The prediction is not high enough"+" "*50).place(x=2*widthf/3, y=130)
+                    self.text1 = tkinter.Label(self.window, text=" "*107).place(x=2*widthf/3, y=160)
 
 
 

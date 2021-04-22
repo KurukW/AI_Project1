@@ -15,3 +15,5 @@ Saved_model\model_almost_perfect_convLSTM2D_1_10_75_100_10_2_20_100_1mili,0.5766
 Saved_model\model_convLSTM2D_8_10_75_100_10_2_50_50_1mili,1.49684978,0.45384616
 Saved_model\model_convLSTM2D_8_10_75_100_10_2_50_50_1mili,1.49684978,0.45384616
 Saved_model\model_convLSTM2D_10_10_75_100_10_1_20_40_1mili,2.58682609,0.26153848
+
+Saved_model\model_convLSTM2D_12_10_90_120_10_3_20_40_2mili,0.50297463,0.83846152
