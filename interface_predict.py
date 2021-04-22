@@ -26,7 +26,7 @@ nb_classes = 10
 valeur_slider = 0
 #model_name = 'model_convLSTM2D_8_10_75_100_10_2_50_50_1mili.h5'
 #path = 'Modele_acc77_bon.h5'
-path = 'Saved_model\\model_convLSTM2D_12_10_90_120_10_3_20_40_2mili.h5'
+path = 'Saved_model\\model_12_90_120_acc83.h5'
 
 
 #'old_goods\\model_good_convLSTM2D_10_75_100_10_2_10_50_1mili.h5'
@@ -92,9 +92,11 @@ class App:
         #self.btn_snapshot2=tkinter.Button(window, text="Snapshot", command=self.snapshot).place(x=2*widthf/3-35, y=heightf-100,width=120,height = 30)
         #self.text1 = tkinter.Label(window, text="inserer ici ce que le modèle a reconnu").place(x=2*widthf/3-35, y=heightf-100)
         #self.btn_snapshot.pack(anchor=tkinter.CENTER, expand=True)
-        self.btn_stop_pred = tkinter.Button(window, text="Freeze",
+        self.btn_stop_pred = tkinter.Button(window, text="Stop Prediction",
                 command=self.stop_pred).place(x=2*widthf/3, y = 80)
 
+        self.btn_new_window = tkinter.Button(window, text = "Ouvrir une nouvelle fenêtre",
+                command = self.open_window).place(x = 80, y = 80)
 
 
         #Pas besoin de pack parce qu'on le place direct
@@ -107,6 +109,8 @@ class App:
         #
         self.movs = []
         self.stop_showing = False
+        self.is_freezed = False
+        self.example_vid = None #Elle n'existe pas au début, on ne la fabrique que si c'est nécessaire
 
 
         t_show = threading.Thread(target=self.get_prediction,daemon=True)
@@ -121,74 +125,207 @@ class App:
         self.delay_fps = int(1000/fps)
         self.update_mov()
 
+
+        # mettre condition de l'ouverture de la new_window
+        self.delay = 15
+        self.update_new_window()
+
+
+
         self.window.mainloop()
-
-    def snapshot(self):
-         # Get a frame from the video source
-         ret, frame = self.vid.get_frame()
-
-         if ret:
-            cv2.imwrite("frame-" + time.strftime("%d-%m-%Y-%H-%M-%S") + ".jpg", cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
 
     def stop_pred(self):
         self.stop_showing = not self.stop_showing
         if self.stop_showing:
-            self.text1 = tkinter.Label(self.window, text="I'm freezed").place(x=2*widthf/3+150, y = 80)
+            self.text1 = tkinter.Label(self.window, text="Affichage arrêté").place(x=2*widthf/3+150, y = 80)
         else:
             self.text1 = tkinter.Label(self.window, text=" "*50).place(x=2*widthf/3+150, y = 80)
 
     def update(self):
          # Get a frame from the video source
-         ret, frame = self.vid.get_frame()
+         if not self.is_freezed:
+             ret, frame = self.vid.get_frame()
 
+             if ret:
+                 #Affichage de l'image
+                 self.photo = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
+                 self.canvas.create_image(0, 0, image = self.photo, anchor = tkinter.NW)
 
-         if ret:
-             #Affichage de l'image
-             self.photo = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
-             self.canvas.create_image(0, 0, image = self.photo, anchor = tkinter.NW)
 
          self.window.after(self.delay, self.update)
 
+    def update_new_window(self):
+         # Get a frame from the video source
+        new_window_set = 0
+        if new_window_set == 1:
+
+            for i in len(self.imgs) :
+             #Affichage de l'image
+                self.photo_vid = PIL.ImageTk.PhotoImage(image = self.imgs[i])
+                self.canvas.create_image(0, 0, image = self.photo_vid, anchor = tkinter.NW)
+
+        self.window.after(self.delay, self.update)
+
+
+    def create_example_videos(self, fps = -1):
+        '''
+        Créer la liste d'images
+        '''
+        if not self.example_vid == None:
+            return
+
+        self.example_vid = []
+
+        csv_ref = pd.read_csv("DATA\\")
+
+        for label, video_name in csv_ref.values:
+            cap = cv2.VideoCapture("DATA\\Video_example" + video_name)
+            try:
+                fps_actu = cap.get(cv2.CAP_PROP_FPS)
+                if fps <= -1: fps = fps_actu #Je peux ne pas donner de fps et ça va prendre le nombre d'fps initial
+                ecart_voulu = int(1000/fps)
+                ecart_initial = int(1000/fps_actu)
+                imgs = []
+
+                ret, frame = cap.read()
+                while(cap.isOpened()):
+                    prev = frame
+                    ret, frame = cap.read()
+
+                    if ret: #Sinon ça plante quand il n'y a plus d'images
+                        #Récupère seulement certaines images
+                        t_ms = cap.get(cv2.CAP_PROP_POS_MSEC)
+                        modulo = t_ms % ecart_voulu
+                        if modulo < ecart_initial:
+                            #Isoler les images
+
+                            imgs.append(diff_gray)
+
+                    else: #Va jusqu'au bout de la vidéo
+                        break
+                else:
+                    print("Le fichier n'a pas pu être ouvert")
+            except:
+                print(f"IL Y A UN PROBLEME AVEC LA VIDEO: {path}")
+            cap.release()
+            self.example_vid.append(imgs)
+
+
+    def open_window(self):
+        self.freeze()
+        new_window = tkinter.Toplevel(self.window)
+        new_window.grab_set() #Force le focus sur cette fenetre
+        new_window.geometry("500x500")
+        new_window.title("New Window")
+        lbl = tkinter.Label(new_window, text="Je suis une nouvelle fenetre")
+        lbl.pack()
+
+
+        #Liste des vidéos
+        canvas =tkinter.Canvas(new_window,width =300,height = 300)
+        canvas.pack()
+        create_example_videos(20) # 20 fps
+
+
+
+        def show_videos():
+            pass
+
+        # Ajouter un nouveau label
+        def new_label():
+            #Idéalement, il faudrait un peu de vérification du nom inséré
+            #(retirer les virgules par exemple, mais ça n'est pas le but du projet)
+            lbl_name = entry_val.get()
+            labels_list = pd.read_csv(labels_uses.csv)
+            if lbl_name in labels_list:
+                text_confirm_new_label = tkinter.Label(new_window, text = "Ce label existe déjà")
+                return
+
+            labels_csv = open(csv,"a")
+            labels_csv.write("\n" + lbl_name) #Ajoute une nouvelle info sur une nouvelle ligne
+            labels_csv.close()
+            text_confirm_new_label = tkinter.Label(new_window, text = "Label ajouté")
+            text_confirm_new_label.pack()
+
+
+        lbl_new_vid = tkinter.Label(new_window, text = "Ajouter un nouveau label")
+        lbl_new_vid.pack() #DEBUG A PLACER PAR NICO
+
+        entry_val = tkinter.StringVar() #Variable spéciale nécessaire pour l'entry_val
+        in_new_vid = tkinter.Entry(new_window, textvariable = entry_val )
+        in_new_vid.pack()
+        btn_new_vid =tkinter.Button(new_window, text = "Confirmer le nouveau label",
+                                    command = new_label)
+        btn_new_vid.pack()
+
+
+        #Filmer des vidéos
+
+
+
+
+
+        # Fermeture de la fenêtre
+        def exit_window():
+            new_window.destroy()
+            new_window.update()
+            self.text_freezed_window.destroy() #Supprime le message qui était sur l'autre fenêtre
+            self.is_freezed = False
+        # Lorsqu'on quitte sur la croix, ça exécute la fonction
+        new_window.protocol("WM_DELETE_WINDOW", exit_window)
+
+    def freeze(self):
+        '''
+        Affiche un message sur la fenêtre principale pour bloquer
+        '''
+        self.is_freezed = True
+        self.text_freezed_window = tkinter.Label(self.window, text="FREEZE, fermez l'autre \n fenetre pour defreeze")
+        self.text_freezed_window.pack()
+
+
+
+
     def update_mov(self):
-        ret, prev = self.vid.get_frame()
-        time.sleep(0.01) #Methode de bourrin, il faudrait autre chose
-        ret, frame = self.vid.get_frame()
-        gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-        prev_gray = cv2.cvtColor(prev,cv2.COLOR_BGR2GRAY)
-        #Détection de mouvement
-        diff = cv2.absdiff(gray,prev_gray)
-        #Réduire la taille
-        resized = cv2.resize(diff, dsize=size, interpolation=cv2.INTER_LINEAR)
-        #Normaliser
-        res_max = resized.max()
-        if res_max != 0:
-            normalized = resized/float(resized.max())
-        else:
-            normalized = resized
-        #normalized = cv2.normalize(resized,0,1,cv2.NORM_MINMAX)
-        self.movs.append(normalized)
+        if not self.is_freezed:
+            ret, prev = self.vid.get_frame()
+            time.sleep(0.01) #Methode de bourrin, il faudrait autre chose
+            ret, frame = self.vid.get_frame()
+            gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
+            prev_gray = cv2.cvtColor(prev,cv2.COLOR_BGR2GRAY)
+            #Détection de mouvement
+            diff = cv2.absdiff(gray,prev_gray)
+            #Réduire la taille
+            resized = cv2.resize(diff, dsize=size, interpolation=cv2.INTER_LINEAR)
+            #Normaliser
+            res_max = resized.max()
+            if res_max != 0:
+                normalized = resized/float(resized.max())
+            else:
+                normalized = resized
+            #normalized = cv2.normalize(resized,0,1,cv2.NORM_MINMAX)
+            self.movs.append(normalized)
+
+        #Je n'ai pas besoin de mettre ce qui suit dans le if mais j'amagine que
+        # c'est plus rapide de ne pas passer dessus (sans arguments ni preuves)
+
+            #Lance la prédiction si on a le bon nombre d'images
+            if len(self.movs) > (n_frames):
+                X = self.movs[:n_frames]
+                del self.movs[:n_frames]
+
+                #Traitement de X
+                X = np.array(X)
+                X = np.expand_dims(X, axis=len(X.shape)) #Ajoute un channel
+                X = np.expand_dims(X, axis = 0)
+
+                #Predict de X
+                q_to_pred.put(X)
 
 
-        #Lance la prédiction si on a le bon nombre d'images
-        if len(self.movs) > (n_frames):
-            X = self.movs[:n_frames]
-            del self.movs[:n_frames]
 
-            #Traitement de X
-            X = np.array(X)
-            X = np.expand_dims(X, axis=len(X.shape)) #Ajoute un channel
-            X = np.expand_dims(X, axis = 0)
+            # afficher le nombre de frames
+            self.text1 = tkinter.Label(self.window, text=str(len(self.movs))+" frames already captured      ").place(x=2*widthf/3, y=330)
 
-            #Predict de X
-            q_to_pred.put(X)
-
-
-
-
-
-
-        # afficher le nombre de frames
-        self.text1 = tkinter.Label(self.window, text=str(len(self.movs))+" frames already captured      ").place(x=2*widthf/3, y=330)
         self.window.after(self.delay_fps,self.update_mov)
 
     def get_prediction(self):
