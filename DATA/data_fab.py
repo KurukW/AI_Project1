@@ -2,43 +2,27 @@ import cv2
 import os
 import time
 import pandas as pd
-from count_data import count #J'importe ce programme afin de voir cb j'ai de chaque au début
+
 
 '''
 Ce programme va nous permettre de fabriquer des images
 '''
 
 
-duree_s = 1 #Durée du timer avant enregistrement
-video_name = "" #Si c'est vide, le numéro est incrémenté à chaque fois: "video_X.avi"
-dossier = 'Test' #ou Train
-framerate = 25
-#Framerate du rendu final. Cela ne définit pas le nombre d'images qu'on lui donne.
-#Si on a un framerate de 20 et la vidéo de 10. ça veut dire qu'une seconde d'enregistrement
-# donne 20 images et donc 2 secondes de vidéo
-
-
-
-if dossier == 'Train':
-    folder = "Videos"
-    csv = "labels.csv"
-elif dossier == 'Test':
-    folder = "V_tests"
-    csv = "labels_tests.csv"
 
 #---------------------------------------------------------------------
 '''
 Objets
 '''
 class Video_saving:
-    def __init__(self,framerate,width,height,label,folder = "",video_name = "",n_frames = 60):
+    def __init__(self,framerate,width,height,label,csv,folder = "",video_name = "",n_frames = 60):
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        file_name,video_name = self.create_name(folder,video_name,label)
+        file_name,video_name = self.create_name(folder,csv,video_name,label)
         self.out = cv2.VideoWriter(file_name,fourcc, framerate,(width,height))
         self.last = time.time()
         self.frame = 0
         self.n_frames = n_frames
-        write_label(label,video_name)
+        write_label(label,csv,video_name)
 
     def update(self,frame):
         start_again = True
@@ -57,7 +41,7 @@ class Video_saving:
                 start_again = False
         return (start_again, self.frame)
 
-    def create_name(self,folder,video_name,label):
+    def create_name(self,folder,csv,video_name,label):
         #Compte le nombre de fichier (ancienne méthode)
         # files = os.listdir("Videos")
         # file_count = len(files)
@@ -85,17 +69,9 @@ class Video_saving:
         self.out.release()
 
 
-
-
-
-
-
-
-
-
 #-------------------------------------------------------------------------------
 '''Fonctions '''
-def write_on_image(img,text, color = (255,255,255),position = "bottom left"):
+def write_on_image(img,text, height, color = (255,255,255),position = "bottom left"):
     '''
     Ecrit du texte sur une image
     L'image est un objet passé par ref et non par valeur
@@ -122,7 +98,7 @@ def write_on_image(img,text, color = (255,255,255),position = "bottom left"):
         fontColor,
         lineType)
 
-def write_label(label,file_name):
+def write_label(label,csv,file_name):
     #Génère les labels la toute première fois
     # labels = open("DATA\\labels.csv", "w")
     # labels.write("label, file_name")
@@ -133,11 +109,9 @@ def write_label(label,file_name):
 
 #-------------------------------------------------------------------------------
 '''MAIN CODE '''
-if __name__ == "__main__":
+def save_video(folder_path, csv_path, ref_label, framerate = 25, duree_s = 2):
     global video_to_saved
 
-    #Affiche le nombre de video que j'ai de chaque type
-    count(csv)
 
 
     # Connects to your computer's default camera
@@ -146,7 +120,7 @@ if __name__ == "__main__":
     soon_saving = False
     label_num = 0
 
-    labels_file = pd.read_csv('labels_list.csv')
+    labels_file = pd.read_csv(ref_label)
     labels = labels_file.values
     # Automatically grab width and height from video feed
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -185,7 +159,7 @@ if __name__ == "__main__":
             s = time_left_f
             if time_left <= 0:
                 soon_saving = False
-                my_video = Video_saving(framerate,width,height,label,folder = folder,n_frames = 60)
+                my_video = Video_saving(framerate,width,height,label,csv_path,folder = folder_path,n_frames = 60)
 
 
         try:
@@ -203,8 +177,8 @@ if __name__ == "__main__":
 
         #à partir d'ici, les modifications sur frame n'auront pas d'effet sur l'enregistrement
         #indique à l'image si on enregistre (non visible sur la vidéo)
-        write_on_image(frame,s,color,"bottom left")
-        write_on_image(frame,"P to save; N to switch label; Q to quit",(255,255,255),"top left")
+        write_on_image(frame,s, height, color, "bottom left")
+        write_on_image(frame,"P to save; N to switch label; Q to quit", height, (255,255,255),"top left")
 
         cv2.imshow('frame',frame)
 
@@ -216,6 +190,33 @@ if __name__ == "__main__":
     # When everything done, release the capture and destroy the windows
     cap.release()
     cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+
+
+    duree_s = 1 #Durée du timer avant enregistrement
+    video_name = "" #Si c'est vide, le numéro est incrémenté à chaque fois: "video_X.avi"
+    dossier = 'Test' #ou Train
+    framerate = 25
+    #Framerate du rendu final. Cela ne définit pas le nombre d'images qu'on lui donne.
+    #Si on a un framerate de 20 et la vidéo de 10. ça veut dire qu'une seconde d'enregistrement
+    # donne 20 images et donc 2 secondes de vidéo
+
+
+    if dossier == 'Train':
+        folder = "Videos"
+        csv = "labels.csv"
+    elif dossier == 'Test':
+        folder = "V_tests"
+        csv = "labels_tests.csv"
+
+
+
+    #Affiche le nombre de video que j'ai de chaque type
+    from count_data import count #J'importe ce programme afin de voir cb j'ai de chaque au début
+    count(csv)
+
+    save_video(folder, csv, ref_label = 'labels_list.csv', framerate = framerate , duree_s = duree_s)
 
 '''
     #Ferme le fichier vidéo

@@ -4,12 +4,13 @@ L'interface:
 William :
 - Gérer le changement de page (Quand on ajoute un mouvement,
  on doit arrêter de filmer et de prédire parce que ça utilise toute la cpu)
--> A achever
 
 - Ajouter un mouvement
   + Film d'une vidéo
   + Ajout dans une liste de labels du nouveau label (ou rien changer si le label existe)
+  + Ajout de plus de vidéos
 -> William s'en occupera
+
 
 - Liste des mouvements actuels
   (+ Visualisation des mouvements actuels)

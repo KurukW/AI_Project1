@@ -26,7 +26,7 @@ nb_classes = 10
 valeur_slider = 0
 #model_name = 'model_convLSTM2D_8_10_75_100_10_2_50_50_1mili.h5'
 #path = 'Modele_acc77_bon.h5'
-path = 'Saved_model\\model_convLSTM2D_12_10_90_120_10_3_20_40_2mili.h5'
+path = 'Saved_model\\model_12_90_120_acc83.h5'
 
 
 #'old_goods\\model_good_convLSTM2D_10_75_100_10_2_10_50_1mili.h5'
