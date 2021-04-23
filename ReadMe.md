@@ -15,30 +15,30 @@ DEVELOPPER L'INTRO
 
 
 ## Technologies
-Python 3.8.8
-Tensorflow 2.3.0
-Jupyterlab 2.2.6
-Keras-visualizer 2.4
-matplotlib 3.3.4
-numpy 1.19.2
-opencv 4.0.1
-pandas 1.2.2
-scikit-learn 0.24.1
-scipy 1.6.1
+Python 3.8.8 \n
+Tensorflow 2.3.0 \n
+Jupyterlab 2.2.6 \n
+Keras-visualizer 2.4 \n
+matplotlib 3.3.4 \n
+numpy 1.19.2 \n
+opencv 4.0.1 \n
+pandas 1.2.2 \n
+scikit-learn 0.24.1 \n
+scipy 1.6.1 \n
 python-graphviz 0.16
 
 
 ## How to use
-Firstly, you can install the multiple packages mentioned above in [Technologies](#Technologies).
+Firstly, you can install the multiple packages mentioned above in [Technologies](#Technologies). \n
 To use interface_predict.py, you need the model "model_12_90_120_acc83.h5" in "Saved_model".
 In DATA, Video_example and labels_example.csv will be necessary to have a visualization of the multiple gestures. Labels_uses.csv is necessary to show the name of the predictions.
 data_fab.py is necessary to create new gestures and new videos.
 
-interface_predict.py is the main program of this project show a live video of the camera and give the prediction result.
+interface_predict.py is the main program of this project, it show a live video of the camera and give the prediction result.
 
 
 ## Features
-DATA/data_fab.py can create short video with a specific amount of frame.
+DATA/data_fab.py can create short video with a specific amount of frame. \n
 model_clean.ipynb is a notebook with the creation of the best model so far (accuracy of 83%)
 
 ## Results
