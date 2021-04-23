@@ -1,5 +1,4 @@
-CeDocNestPasImportant.txt
-frame_rate.py
 Old_Skeletonization
-test_data
 new_video.py
+model_tester.ipynb
+live_predict.py

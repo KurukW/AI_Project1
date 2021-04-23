@@ -10,6 +10,7 @@ import threading
 from queue import Queue
 from tensorflow import keras
 import tensorflow as tf
+from DATA.data_fab import * #Afin d'ajouter une nouvelle video
 
 '''
 Parametres
@@ -20,7 +21,7 @@ seuil = 0.4
 
 
 #Paramètres
-fps = 10
+fps = 10 #Ne plus modifier, c'est définitif maintenant
 size = (120,90) #Sens inverse au nom du modèle
 nb_classes = 10
 valeur_slider = 0
@@ -95,8 +96,8 @@ class App:
         self.btn_stop_pred = tkinter.Button(window, text="Stop Prediction",
                 command=self.stop_pred).place(x=2*widthf/3, y = 80)
 
-        self.btn_new_window = tkinter.Button(window, text = "Ouvrir une nouvelle fenêtre",
-                command = self.open_window).place(x = 80, y = 80)
+        self.btn_new_window = tkinter.Button(window, text = "Open a new window",
+                command = self.open_window).place(x = 120, y = 550)
 
 
         #Pas besoin de pack parce qu'on le place direct
@@ -118,15 +119,9 @@ class App:
 
          # After it is called once, the update method will be automatically called every delay milliseconds
          #Affichage
-        self.delay = 15
+        self.this_frame = False #Je prend une image sur deux pour la prédiction
+        self.delay = 50 #20 fps
         self.update()
-
-        #Mouvement
-        self.delay_fps = int(1000/fps)
-        self.update_mov()
-
-
-
 
 
         self.window.mainloop()
@@ -134,7 +129,7 @@ class App:
     def stop_pred(self):
         self.stop_showing = not self.stop_showing
         if self.stop_showing:
-            self.text1 = tkinter.Label(self.window, text="Affichage arrêté").place(x=2*widthf/3+150, y = 80)
+            self.text1 = tkinter.Label(self.window, text="Stopped display").place(x=2*widthf/3+150, y = 80)
         else:
             self.text1 = tkinter.Label(self.window, text=" "*50).place(x=2*widthf/3+150, y = 80)
 
@@ -148,21 +143,41 @@ class App:
                  self.photo = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
                  self.canvas.create_image(0, 0, image = self.photo, anchor = tkinter.NW)
 
+                 #Mouvement
+                 if self.this_frame:
+                    gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
+                    prev_gray = cv2.cvtColor(self.prev,cv2.COLOR_BGR2GRAY)
+                    #Détection de mouvement
+                    diff = cv2.absdiff(gray,prev_gray)
+                    #Réduire la taille
+                    resized = cv2.resize(diff, dsize=size, interpolation=cv2.INTER_LINEAR)
+                    #Normaliser
+                    res_max = resized.max()
+                    if res_max != 0:
+                        normalized = resized/float(resized.max())
+                    else:
+                        normalized = resized
+                    self.movs.append(normalized)
 
+                #Envoie à la prédiction
+                 if len(self.movs) > (n_frames):
+                     X = self.movs[:n_frames]
+                     del self.movs[:n_frames]
+
+                     #Traitement de X
+                     X = np.array(X)
+                     X = np.expand_dims(X, axis=len(X.shape)) #Ajoute un channel
+                     X = np.expand_dims(X, axis = 0)
+
+                     #Predict de X
+                     q_to_pred.put(X)
+
+                 # afficher le nombre de frames
+                 self.text1 = tkinter.Label(self.window, text=str(len(self.movs))+" frames already captured      ").place(x=2*widthf/3, y=330)
+
+                 self.this_frame = not self.this_frame #J'inverse pour prendre une image sur deux
+                 self.prev = frame
          self.window.after(self.delay, self.update)
-    #
-    # def update_new_window(self):
-    #      # Get a frame from the video source
-    #     new_window_set = 0
-    #     if new_window_set == 1:
-    #
-    #         for i in len(self.imgs) :
-    #          #Affichage de l'image
-    #             self.photo_vid = PIL.ImageTk.PhotoImage(image = self.imgs[i])
-    #             self.canvas.create_image(0, 0, image = self.photo_vid, anchor = tkinter.NW)
-    #
-    #     self.window.after(self.delay, self.update)
-
 
     def create_example_videos(self, fps = -1):
         '''
@@ -204,7 +219,7 @@ class App:
             except:
                 print(f"IL Y A UN PROBLEME AVEC LA VIDEO: {video_name}")
             cap.release()
-            self.example_vid.append(imgs)
+            self.example_vid.append((imgs,label))
         #print("J'ai réussi à importer toutes les vidéos") #DEBUG
 
     def open_window(self):
@@ -213,8 +228,9 @@ class App:
         new_window.grab_set() #Force le focus sur cette fenetre
         new_window.geometry("500x500")
         new_window.title("New Window")
-        lbl = tkinter.Label(new_window, text="Je suis une nouvelle fenetre")
-        lbl.pack()
+        #Label de la video qui passe actuellement
+        self.label_video_name = tkinter.Label(new_window,text = 'loading the video', font = ("Helvetica", 18))
+        self.label_video_name.pack()
 
 
         #Liste des vidéos
@@ -222,22 +238,31 @@ class App:
         self.canvas_ex.pack()
         self.create_example_videos(20) # 20 fps
 
+        def add_vid():
+            del self.vid
+            save_video('DATA\\Videos', 'DATA\\labels.csv', 'DATA\\labels_uses.csv',25,2)
+            self.vid = MyVideoCapture(self.video_source)
+        btn_add_vid = tkinter.Button(new_window, text = "New video",
+                                command = add_vid)
+        btn_add_vid.pack()
+
 
         def show_videos():
             if self.example_vid == None:
                 print("Pas de videos")
                 return
-            vid_len = len(self.example_vid[0])
+            vid_len = len(self.example_vid[0][0])
             tot_len = vid_len * len(self.example_vid)
             if self.count_img_example >= tot_len:
                 self.count_img_example = 0
 
 
-
-            img = self.example_vid[int(self.count_img_example / vid_len)][int(self.count_img_example % vid_len)]
+            img = self.example_vid[int(self.count_img_example / vid_len)][0][int(self.count_img_example % vid_len)]
             #img = self.example_vid[0][5]
             self.photo_vid = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(img))
             self.canvas_ex.create_image(0, 0, image = self.photo_vid, anchor = tkinter.NW)
+            label = self.example_vid[int(self.count_img_example / vid_len)][1]
+            self.label_video_name.config(text = label)
 
             self.count_img_example += 1
             new_window.after(50, show_videos)
@@ -250,35 +275,37 @@ class App:
             #Idéalement, il faudrait un peu de vérification du nom inséré
             #(retirer les virgules par exemple, mais ça n'est pas le but du projet)
             csv = "DATA\\labels_uses.csv"
+
             lbl_name = entry_val.get()
             labels_list = pd.read_csv(csv)
-            if lbl_name in labels_list:
+            if lbl_name in labels_list.values:
                 #Il y a un problème, il ne passe pas ici et ajoute deux fois le nom
-                text_confirm_new_label = tkinter.Label(new_window, text = "Ce label existe déjà")
+                text_confirm_new_label.config(text ="This label already exists")
                 return
-
             labels_csv = open(csv,"a")
             labels_csv.write("\n" + lbl_name) #Ajoute une nouvelle info sur une nouvelle ligne
             labels_csv.close()
-            text_confirm_new_label = tkinter.Label(new_window, text = "Label ajouté")
-            text_confirm_new_label.pack()
+            text_confirm_new_label.config(text ="Label added")
 
 
-        lbl_new_vid = tkinter.Label(new_window, text = "Ajouter un nouveau label")
+        #Confirmation d'ajout d'un label
+        text_confirm_new_label = tkinter.Label(new_window)
+        text_confirm_new_label.pack()
+
+
+        lbl_new_vid = tkinter.Label(new_window, text = "Add a new label")
         lbl_new_vid.pack() #DEBUG A PLACER PAR NICO
 
         entry_val = tkinter.StringVar() #Variable spéciale nécessaire pour l'entry_val
         in_new_vid = tkinter.Entry(new_window, textvariable = entry_val )
         in_new_vid.pack()
-        btn_new_vid =tkinter.Button(new_window, text = "Confirmer le nouveau label",
+        btn_new_vid =tkinter.Button(new_window, text = "Comfirm the new label",
                                     command = new_label)
         btn_new_vid.pack()
 
 
+
         #Filmer des vidéos
-
-
-
 
 
         # Fermeture de la fenêtre
@@ -295,54 +322,11 @@ class App:
         Affiche un message sur la fenêtre principale pour bloquer
         '''
         self.is_freezed = True
-        self.text_freezed_window = tkinter.Label(self.window, text="FREEZE, fermez l'autre \n fenetre pour defreeze")
+        self.text_freezed_window = tkinter.Label(self.window, text="FREEZE, close the other \n window to defreeze")
         self.text_freezed_window.pack()
 
 
 
-
-    def update_mov(self):
-        if not self.is_freezed:
-            ret, prev = self.vid.get_frame()
-            time.sleep(0.01) #Methode de bourrin, il faudrait autre chose
-            ret, frame = self.vid.get_frame()
-            gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-            prev_gray = cv2.cvtColor(prev,cv2.COLOR_BGR2GRAY)
-            #Détection de mouvement
-            diff = cv2.absdiff(gray,prev_gray)
-            #Réduire la taille
-            resized = cv2.resize(diff, dsize=size, interpolation=cv2.INTER_LINEAR)
-            #Normaliser
-            res_max = resized.max()
-            if res_max != 0:
-                normalized = resized/float(resized.max())
-            else:
-                normalized = resized
-            #normalized = cv2.normalize(resized,0,1,cv2.NORM_MINMAX)
-            self.movs.append(normalized)
-
-        #Je n'ai pas besoin de mettre ce qui suit dans le if mais j'amagine que
-        # c'est plus rapide de ne pas passer dessus (sans arguments ni preuves)
-
-            #Lance la prédiction si on a le bon nombre d'images
-            if len(self.movs) > (n_frames):
-                X = self.movs[:n_frames]
-                del self.movs[:n_frames]
-
-                #Traitement de X
-                X = np.array(X)
-                X = np.expand_dims(X, axis=len(X.shape)) #Ajoute un channel
-                X = np.expand_dims(X, axis = 0)
-
-                #Predict de X
-                q_to_pred.put(X)
-
-
-
-            # afficher le nombre de frames
-            self.text1 = tkinter.Label(self.window, text=str(len(self.movs))+" frames already captured      ").place(x=2*widthf/3, y=330)
-
-        self.window.after(self.delay_fps,self.update_mov)
 
     def get_prediction(self):
         '''
@@ -365,7 +349,7 @@ class App:
                     for i,(val, index) in enumerate(sortable_pred):
                         #pourcent = f"{val:4.3f}"
                         nom = labels_n[index]
-                        texte = str(val) +"  :  " + nom + " "*70
+                        texte = str(round((val*100),2)) + " %" +"  :  " + nom + " "*70
                         self.text1 = tkinter.Label(self.window, text=texte).place(x=2*widthf/3, y=(30*i)+100)
                         if i ==2:
                             break
