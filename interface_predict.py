@@ -1,4 +1,3 @@
-
 import tkinter
 import cv2
 import PIL.Image, PIL.ImageTk
@@ -16,46 +15,24 @@ from DATA.data_fab import * #Afin d'ajouter une nouvelle video
 Parametres
 '''
 heightf, widthf = 640, 1080
-seuil = 0.4
-
-
+seuil = 0.4 #Affichage des prédictions avec un résultat supérieur au seuil
 
 #Paramètres
 fps = 10 #Ne plus modifier, c'est définitif maintenant
 size = (120,90) #Sens inverse au nom du modèle
 nb_classes = 10
-valeur_slider = 0
-#model_name = 'model_convLSTM2D_8_10_75_100_10_2_50_50_1mili.h5'
-#path = 'Modele_acc77_bon.h5'
-path = 'Saved_model\\model_12_90_120_acc83.h5'
-
-
-#'old_goods\\model_good_convLSTM2D_10_75_100_10_2_10_50_1mili.h5'
-#Broken: [nan]
-# fps = 8
-# size = (40,30) #Sens inverse au nom du modèle
-# nb_classes = 10
-# epochs = 1
-# batch_size = 20
-# pack_size = 50
-# learning_rate = 0.01
-
-
-
-
+path = 'Saved_model\\model_12_90_120_acc83.h5' #Model final
 
 #-------------------------------------------------------------------------------
-'''
-Fonctions
-'''
-
 
 '''
 Thread
 '''
 def predict(model):
     '''
-    Prédit un résultat de la queue et le remet dans la queue
+    Prédit le mouvement avec les images de "q_to_pred"
+    et met le résultat dans "q_pred" qui est affiché par la méthode
+    "q_pred" dans la class APP
     '''
     while True:
         #with tf.device('cpu:0'):
@@ -63,7 +40,7 @@ def predict(model):
         start_pred = time.time()
         pred = model.predict(X)
         end_pred = time.time()
-        print(f"Une prédiction prend {end_pred - start_pred} secondes")
+        #print(f"Une prédiction prend {end_pred - start_pred} secondes") #DEBUG
         q_pred.put(pred)
 
 
@@ -88,32 +65,20 @@ class App:
         self.canvas.pack()
         self.canvas.place(x = 50,y = 0)
 
-         # Button that lets the user take a snapshot
-        #self.btn_snapshot=tkinter.Button(window, text="Snapshot", command=self.snapshot).place(x=widthf/3-35, y=heightf-100,width=120,height = 30)
-        #self.btn_snapshot2=tkinter.Button(window, text="Snapshot", command=self.snapshot).place(x=2*widthf/3-35, y=heightf-100,width=120,height = 30)
-        #self.text1 = tkinter.Label(window, text="inserer ici ce que le modèle a reconnu").place(x=2*widthf/3-35, y=heightf-100)
-        #self.btn_snapshot.pack(anchor=tkinter.CENTER, expand=True)
         self.btn_stop_pred = tkinter.Button(window, text="Stop Prediction",
-                command=self.stop_pred).place(x=2*widthf/3, y = 80)
+                command=self.stop_pred).place(x=2*widthf/3, y = 60)
 
-        self.btn_new_window = tkinter.Button(window, text = "Open a new window",
-                command = self.open_window).place(x = 120, y = 550)
+        self.btn_new_window = tkinter.Button(window, text = "Configuration",
+                command = self.open_window).place(x=2*widthf/3, y = 20)
 
-
-        #Pas besoin de pack parce qu'on le place direct
-        # #liste de tous les gestes sur la droite de l'écran
-        #
-        # label = pd.read_csv("DATA\\labels_uses.csv")
-        #
-        # for i,labels in enumerate(label.values):
-        #     self.text1 = tkinter.Label(window, text=labels[0]).place(x=2*widthf/3, y=(30*i)+100)
-        #
-        self.movs = []
-        self.stop_showing = False
-        self.is_freezed = False
+        #Quelques variables
+        self.movs = [] #Images à prédire
+        self.stop_showing = False #Fige l'affichage des prédictions
+        self.is_freezed = False #Fige toute la fenêtre
         self.example_vid = None #Elle n'existe pas au début, on ne la fabrique que si c'est nécessaire
 
 
+        #Démarre les prédictions en parallèle
         t_show = threading.Thread(target=self.get_prediction,daemon=True)
         t_show.start()
 
@@ -123,19 +88,25 @@ class App:
         self.delay = 50 #20 fps
         self.update()
 
-
         self.window.mainloop()
 
+
     def stop_pred(self):
+        '''
+        freeze l'affichage des prédictions
+        '''
         self.stop_showing = not self.stop_showing
         if self.stop_showing:
-            self.text1 = tkinter.Label(self.window, text="Stopped display").place(x=2*widthf/3+150, y = 80)
+            self.text_display = tkinter.Label(self.window, text="Stopped display").place(x=2*widthf/3+150, y = 80)
         else:
-            self.text1 = tkinter.Label(self.window, text=" "*50).place(x=2*widthf/3+150, y = 80)
+            self.text_display = tkinter.Label(self.window, text=" "*50).place(x=2*widthf/3+150, y = 80)
 
     def update(self):
+        '''
+        Méthode appelée toutes les 15 ms : permet l'affichage de la caméra ainsi que le traitement des images
+        '''
          # Get a frame from the video source
-         if not self.is_freezed:
+        if not self.is_freezed:
              ret, frame = self.vid.get_frame()
 
              if ret:
@@ -175,9 +146,12 @@ class App:
                  # afficher le nombre de frames
                  self.text1 = tkinter.Label(self.window, text=str(len(self.movs))+" frames already captured      ").place(x=2*widthf/3, y=330)
 
+
                  self.this_frame = not self.this_frame #J'inverse pour prendre une image sur deux
                  self.prev = frame
-         self.window.after(self.delay, self.update)
+
+        #Appel à nouveau cette methode dans "delay" millisecondes
+        self.window.after(self.delay, self.update)
 
     def create_example_videos(self, fps = -1):
         '''
@@ -215,23 +189,27 @@ class App:
                     else: #Va jusqu'au bout de la vidéo
                         break
                 else:
-                    print("Le fichier n'a pas pu être ouvert")
+                    print("Le fichier n'a pas pu être ouvert") #Error
             except:
-                print(f"IL Y A UN PROBLEME AVEC LA VIDEO: {video_name}")
+                print(f"IL Y A UN PROBLEME AVEC LA VIDEO: {video_name}") #Error
             cap.release()
             self.example_vid.append((imgs,label))
         #print("J'ai réussi à importer toutes les vidéos") #DEBUG
 
     def open_window(self):
+        '''
+        méthode générale pour la deuxième fenetre
+        '''
+        #Freeze la première fenêtre afin d'économiser la cpu et augmenter les performances
         self.freeze()
         new_window = tkinter.Toplevel(self.window)
         new_window.grab_set() #Force le focus sur cette fenetre
         new_window.geometry("500x500")
-        new_window.title("New Window")
+        new_window.resizable(False,False) #Fixe la taille de la fenêtre
+        new_window.title("Configuration")
         #Label de la video qui passe actuellement
         self.label_video_name = tkinter.Label(new_window,text = 'loading the video', font = ("Helvetica", 18))
         self.label_video_name.pack()
-
 
         #Liste des vidéos
         self.canvas_ex = tkinter.Canvas(new_window,width =320,height = 240)
@@ -239,15 +217,21 @@ class App:
         self.create_example_videos(20) # 20 fps
 
         def add_vid():
+            '''
+            methode pour ajouter une video
+            '''
             del self.vid
             save_video('DATA\\Videos', 'DATA\\labels.csv', 'DATA\\labels_uses.csv',25,2)
             self.vid = MyVideoCapture(self.video_source)
-        btn_add_vid = tkinter.Button(new_window, text = "New video",
+        btn_add_vid = tkinter.Button(new_window, text = "Add a video to the training set",
                                 command = add_vid)
-        btn_add_vid.pack()
+        btn_add_vid.place(x = 30, y = 400)
 
 
         def show_videos():
+            '''
+            défilement automatique des videos sur la seconde fenetre
+            '''
             if self.example_vid == None:
                 print("Pas de videos")
                 return
@@ -272,6 +256,9 @@ class App:
 
         # Ajouter un nouveau label
         def new_label():
+            '''
+            ajout d'un nouveau geste
+            '''
             #Idéalement, il faudrait un peu de vérification du nom inséré
             #(retirer les virgules par exemple, mais ça n'est pas le but du projet)
             csv = "DATA\\labels_uses.csv"
@@ -304,17 +291,27 @@ class App:
         btn_new_vid.pack()
 
 
-
-        #Filmer des vidéos
-
+        def train():
+            '''
+            methode pour l'entrainement du modèle, le code n'est pas implémenter car l'entrainement est trop long ( min 10 heures)
+            '''
+            print("Model training ...")
+            #On ne peut pas train le modele, ça prend 10h
+            time.sleep(2)
+            print("Model trained")
+        #Bouton pour retrain le model
+        btn_train = tkinter.Button(new_window, text = "Retrain the model",
+                                    command = train)
+        btn_train.place(x = 350, y = 400)
 
         # Fermeture de la fenêtre
         def exit_window():
             new_window.destroy()
             new_window.update()
             self.text_freezed_window.destroy() #Supprime le message qui était sur l'autre fenêtre
-            self.is_freezed = False
-        # Lorsqu'on quitte sur la croix, ça exécute la fonction
+            self.is_freezed = False #Defreeze la fenêtre principale
+
+        # Lorsqu'on click sur la croix, ça exécute la fonction
         new_window.protocol("WM_DELETE_WINDOW", exit_window)
 
     def freeze(self):
@@ -322,15 +319,14 @@ class App:
         Affiche un message sur la fenêtre principale pour bloquer
         '''
         self.is_freezed = True
-        self.text_freezed_window = tkinter.Label(self.window, text="FREEZE, close the other \n window to defreeze")
+        self.text_freezed_window = tkinter.Label(self.window, text="FREEZE, close the other \n window to defreeze",
+                                    font = ('Helvetica', 30), bg = 'red')
         self.text_freezed_window.pack()
-
-
 
 
     def get_prediction(self):
         '''
-        Affiche un résultat
+        Affiche un résultat que la fonction "predict" a calculé
         '''
         while True:
 
@@ -342,23 +338,25 @@ class App:
             # En une ligne:
             sortable_pred = [(elt,i) for i,elt in enumerate(pred[0])]
             sortable_pred.sort(reverse = True)
+
             #Affichage des résultat
-            print("La première valeur est ", sortable_pred[0])
+            #print("La première valeur est ", sortable_pred[0]) #Debug
             if not self.stop_showing:
-                if sortable_pred[0] >=(seuil,):
+                if sortable_pred[0][0] >= seuil:
                     for i,(val, index) in enumerate(sortable_pred):
                         #pourcent = f"{val:4.3f}"
                         nom = labels_n[index]
                         texte = str(round((val*100),2)) + " %" +"  :  " + nom + " "*70
                         self.text1 = tkinter.Label(self.window, text=texte).place(x=2*widthf/3, y=(30*i)+100)
+
+                        if i == 0:
+                            self.text_big = tkinter.Label(self.window, text=nom + " "*70 ,font = ('Helvetica', 30)).place(x=50, y=550)
                         if i ==2:
                             break
                 else:
                     self.text1 = tkinter.Label(self.window, text=" "*107).place(x=2*widthf/3, y=100)
                     self.text1 = tkinter.Label(self.window, text="The prediction is not high enough"+" "*50).place(x=2*widthf/3, y=130)
                     self.text1 = tkinter.Label(self.window, text=" "*107).place(x=2*widthf/3, y=160)
-
-
 
 
 class MyVideoCapture:
@@ -404,14 +402,12 @@ except:
     sys.exit()
 
 
-
 #Fabrication du dictionnaire de noms
 labels_name = pd.read_csv("DATA\\labels_uses.csv")
 labels_n = {}
 for i,label in enumerate(labels_name.values):
     labels_n[label[0]] = i
     labels_n[i] = label[0]
-
 
 
 #queue
@@ -429,7 +425,3 @@ n_frames = int(fps*2.4)
 
  # Create a window and pass it to the Application object
 App(tkinter.Tk(), "Tkinter and OpenCV")
-
-# valeur_slider = slider.get()
-# slider = tkinter.Scale(self.window, from_=0, to=100, tickinterval = 20,orient="horizontal",label = "Thershold value",length = 300)
-# slider.place(x=300,y=550)
