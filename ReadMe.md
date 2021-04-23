@@ -42,6 +42,9 @@ DATA/data_fab.py can create short video with a specific amount of frame.
 
 model_clean.ipynb is a notebook with the creation of the best model so far (accuracy of 83%)
 
+### Notes
+Videos aren't on the Repository because of privacy. labels.csv is still there so the programs still make sens.
+
 ## Results
 Below is the confusion matrix of the best model so far. It was trained with 1476 videos.
 ![Confusion maxtrix](./Saved_model/images/Model_acc83_Confusion.PNG)
