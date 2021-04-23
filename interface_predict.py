@@ -44,7 +44,6 @@ def predict(model):
         q_pred.put(pred)
 
 
-
 #-------------------------------------------------------------------------------
 '''
 Class
@@ -78,7 +77,7 @@ class App:
         self.example_vid = None #Elle n'existe pas au début, on ne la fabrique que si c'est nécessaire
 
 
-        #Démarre les prédictions en parallèle
+        #Thread de l'affichage
         t_show = threading.Thread(target=self.get_prediction,daemon=True)
         t_show.start()
 
@@ -144,7 +143,7 @@ class App:
                      q_to_pred.put(X)
 
                  # afficher le nombre de frames
-                 self.text1 = tkinter.Label(self.window, text=str(len(self.movs))+" frames already captured      ").place(x=2*widthf/3, y=330)
+                 self.text_n_frames = tkinter.Label(self.window, text=str(len(self.movs))+" frames already captured      ").place(x=2*widthf/3, y=330)
 
 
                  self.this_frame = not self.this_frame #J'inverse pour prendre une image sur deux
@@ -402,7 +401,7 @@ except:
     sys.exit()
 
 
-#Fabrication du dictionnaire de noms
+#Fabrication du dictionnaire de noms. Il sert à l'affichage des prédictions
 labels_name = pd.read_csv("DATA\\labels_uses.csv")
 labels_n = {}
 for i,label in enumerate(labels_name.values):
@@ -414,7 +413,7 @@ for i,label in enumerate(labels_name.values):
 q_to_pred = Queue() #X vers la prédiction
 q_pred = Queue() #pred vers l'affichage
 
-#Thread
+#Thread de la prediction
 t_pred = threading.Thread(target=predict,args=((model,)),daemon= True)
 t_pred.start()
 
