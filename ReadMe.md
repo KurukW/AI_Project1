@@ -1,8 +1,7 @@
 
 
 # Hand gesture recognition in industry
-Scool project on a deep learning application.
-DEVELOPPER L'INTRO
+School project on a deep learning application.
 
 
 ## Table of contents
