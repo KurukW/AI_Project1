@@ -6,7 +6,7 @@ model_test.ipynb
 DATA/V_tests/
 DATA/repare_data.py
 DATA/Backup_French_labels
-DATA/Videos
+DATA/Videos_initiales
 .ipynb_checkpoints/
 HTML_notebook/
 __pycache__/

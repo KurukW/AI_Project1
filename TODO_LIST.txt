@@ -20,7 +20,7 @@
 
 - On donne trop de détails de code et d'interface, on doit surtout s'intéresser à l'algorithme (pour ISPA qui est une conférence technique)
 + Rendre la dataset publique
--> Non
+-> Uniquement les vidéos traitées
 - Expliquer le split entre train et test.
 - expliquer un peu plus notre méthode de "packs", expliquer pq on a fait comme ça et ce que ça change par rapport à la méthode classique.
 - Ajouter des références à Tkinter et OpenCv.
