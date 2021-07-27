@@ -10,3 +10,6 @@ DATA/Videos
 .ipynb_checkpoints/
 HTML_notebook/
 __pycache__/
+Interface_Test.py
+DATA/data_fabrication.py
+DATA/treatment.py

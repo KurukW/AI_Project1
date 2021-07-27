@@ -25,3 +25,10 @@
 - expliquer un peu plus notre méthode de "packs", expliquer pq on a fait comme ça et ce que ça change par rapport à la méthode classique.
 - Ajouter des références à Tkinter et OpenCv.
 + Changer la langue des images (changé dans le programme, screenshot à refaire)
+
+
+Nettoyage du git:
+Avant de le rendre publique, il faudra retirer:
+-Sources
+-Interface V_test
+-Model_experiences
