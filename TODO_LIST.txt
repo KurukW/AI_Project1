@@ -11,9 +11,9 @@
 + Dataset trop petite par rapport au nombre de paramètres
 -> Rip
 
-- Il faut peut être éviter de donner l'évolution des % qui est louche, 26% -> 83% est pas normal.
++ Il faut peut être éviter de donner l'évolution des % qui est louche, 26% -> 83% est pas normal.
 
-- La table 1 n'a pas d'intérêt parce qu'elle n'est pas en lien direct avec notre article.
++ La table 1 n'a pas d'intérêt parce qu'elle n'est pas en lien direct avec notre article.
 
 - Notre article de référence avec les deux caméras n'est pas une bonne référence parce qu'ils utilisent deux caméras et nous non.
  Ou alors il faut mieux expliquer pq on s'intéresse à eux.
@@ -22,7 +22,7 @@
 + Rendre la dataset publique
 -> Uniquement les vidéos traitées
 - Expliquer le split entre train et test.
-- expliquer un peu plus notre méthode de "packs", expliquer pq on a fait comme ça et ce que ça change par rapport à la méthode classique.
++ expliquer un peu plus notre méthode de "packs", expliquer pq on a fait comme ça et ce que ça change par rapport à la méthode classique.
 - Ajouter des références à Tkinter et OpenCv.
 + Changer la langue des images (changé dans le programme, screenshot à refaire)
 
