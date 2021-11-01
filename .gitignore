@@ -7,8 +7,11 @@ DATA/repare_data.py
 DATA/Backup_French_labels
 DATA/Videos_initiales
 .ipynb_checkpoints/
+DATA/.ipynb_checkpoints/
 HTML_notebook/
 __pycache__/
 Interface_Test.py
 DATA/data_fabrication.py
 DATA/treatment.py
+model_experiences.ipynb
+Sources/

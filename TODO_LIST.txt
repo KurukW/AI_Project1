@@ -2,7 +2,7 @@
 
 -Trop de détails qui sont connus par les experts. On ne doit pas écrire un article qui peut être lu par n'importe qui.
 
--Il faut ajouter la catégorie "pas de mouvements" (ou plus expliquer notre manière
++Il faut ajouter la catégorie "pas de mouvements" (ou plus expliquer notre manière
  de procéder avec le % de réussite mais je ne pense pas que ça soit vraiment accepté par les experts)
 
 -> En plus du fait qu'il faut 150 vidéos de "rien",
@@ -21,7 +21,7 @@
 - On donne trop de détails de code et d'interface, on doit surtout s'intéresser à l'algorithme (pour ISPA qui est une conférence technique)
 + Rendre la dataset publique
 -> Uniquement les vidéos traitées
-- Expliquer le split entre train et test.
++ Expliquer le split entre train et test.
 + expliquer un peu plus notre méthode de "packs", expliquer pq on a fait comme ça et ce que ça change par rapport à la méthode classique.
 - Ajouter des références à Tkinter et OpenCv.
 + Changer la langue des images (changé dans le programme, screenshot à refaire)
