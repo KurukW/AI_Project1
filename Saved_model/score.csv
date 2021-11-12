@@ -1,0 +1,19 @@
+model_name, loss, accuracy, comment
+
+Saved_model\model_LSTM_2_30_40_10_2_50_50_10mili,2.53898406,0.13333334
+Saved_model\model_LSTM_8_30_40_10_1_20_50_10mili,0,0,'Cassé [nan]'
+
+Saved_model\model_convLSTM2D_10_30_40_10_10_100_100_1mili,4.92132092,0.06666667
+Saved_model\model_good_convLSTM2D_10_75_100_10_2_10_50_1mili,1.64705408,0.46666667
+Saved_model\model_very_good_convLSTM2D_10_75_100_10_2_10_50_1mili,1.79268169,0.446153849
+
+Saved_model\model_convLSTM2D_1_5_75_100_10_2_10_50_10mili,2.04945612,0.26153848
+Saved_model\model_convLSTM2D_1_5_90_120_10_2_10_50_10mili,2.21008158,0.12307692
+
+Saved_model\model_almost_perfect_convLSTM2D_1_10_75_100_10_2_20_100_1mili,0.57661033,0.79230767
+
+Saved_model\model_convLSTM2D_8_10_75_100_10_2_50_50_1mili,1.49684978,0.45384616
+Saved_model\model_convLSTM2D_8_10_75_100_10_2_50_50_1mili,1.49684978,0.45384616
+Saved_model\model_convLSTM2D_10_10_75_100_10_1_20_40_1mili,2.58682609,0.26153848
+
+Saved_model\model_12_90_120_acc83,0.50297463,0.83846152
